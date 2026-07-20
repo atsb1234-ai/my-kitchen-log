@@ -1,8 +1,308 @@
-<!-- ... existing code ... -->
-        <!-- 5. 學習與備料指南 (Guide Tab) -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廚房成長日誌與菜單管理系統</title>
+    <!-- 引入 Tailwind CSS 進行全響應式 UI 設計 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 圖標庫 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 引入 Google 體系 Inter 與 Noto Sans 繁體中文美化字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .tab-content {
+            transition: opacity 0.25s ease-in-out;
+        }
+        .rating-star {
+            cursor: pointer;
+            transition: color 0.15s ease-in-out, transform 0.1s;
+        }
+        .rating-star:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col pb-16 md:pb-6">
+
+    <!-- 頂部與導覽列 -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-amber-400 to-orange-500 text-white p-2.5 rounded-2xl shadow-md">
+                    <i class="fa-solid fa-kitchen-set text-2xl animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                        廚房成長日誌 <span class="text-xs bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-bold">零廚藝神隊友 V2.0</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-500">陪伴您記錄新廚房的每一次驚喜，用 AI 守護孩子的挑食胃口</p>
+                </div>
+            </div>
+            
+            <!-- 導覽標籤切換按鈕 (桌面端) -->
+            <nav class="flex bg-slate-100 p-1 rounded-xl border border-slate-200/50">
+                <button onclick="switchTab('tracker')" id="btn-tab-tracker" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-orange-600 shadow-xs">
+                    <i class="fa-solid fa-book-open mr-1"></i> 菜單紀錄與統計
+                </button>
+                <button onclick="switchTab('recipes-100')" id="btn-tab-recipes-100" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-800">
+                    <i class="fa-solid fa-trophy mr-1"></i> 經典 100 挑戰庫
+                </button>
+                <button onclick="switchTab('guide')" id="btn-tab-guide" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-800">
+                    <i class="fa-solid fa-lightbulb mr-1"></i> 學習與備料指南
+                </button>
+                <button onclick="switchTab('ai-assistant')" id="btn-tab-ai-assistant" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-800 flex items-center gap-1">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i> AI 智慧助手
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 💡 GitHub Pages 專屬提示橫幅 -->
+    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs py-2 px-4 text-center font-bold shadow-inner">
+        <i class="fa-solid fa-circle-check mr-1"></i> 恭喜！此網頁已成功部署。您可以在手機/平板同步開啟此網址，完全支援手勢與離線本機儲存！
+    </div>
+
+    <!-- 主內容區 -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+        <!-- 1. 菜單紀錄與統計 (Tracker Tab) -->
+        <section id="content-tracker" class="tab-content space-y-6">
+            <!-- 數據統計看板 -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+                    <div class="bg-orange-50 text-orange-500 p-3 rounded-xl"><i class="fa-solid fa-fire text-xl"></i></div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-bold">累計做過料理</p>
+                        <h3 id="stat-total-cooked" class="text-xl font-black text-slate-800">1 道</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+                    <div class="bg-amber-50 text-amber-500 p-3 rounded-xl"><i class="fa-solid fa-star text-xl"></i></div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-bold">孩子平均評分</p>
+                        <h3 id="stat-avg-rating" class="text-xl font-black text-slate-800">5.0 ★</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+                    <div class="bg-rose-50 text-rose-500 p-3 rounded-xl"><i class="fa-solid fa-face-grimace text-xl"></i></div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-bold">挑食警報率</p>
+                        <h3 id="stat-picky-rate" class="text-xl font-black text-slate-800">0%</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+                    <div class="bg-indigo-50 text-indigo-500 p-3 rounded-xl"><i class="fa-solid fa-heart text-xl"></i></div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-bold">最常烹飪類別</p>
+                        <h3 id="stat-fav-category" class="text-xs font-black text-slate-800 truncate max-w-[120px]">主食一鍋搞定</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主架構：左側新增表單，右側歷史紀錄 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 左側：新增做菜紀錄表單 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                    <h3 class="font-black text-slate-800 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                        <i class="fa-solid fa-square-plus text-orange-500"></i> 新增做菜日記
+                    </h3>
+                    <form id="recipe-form" onsubmit="saveRecipe(event)" class="space-y-3.5 text-xs">
+                        <input type="hidden" id="recipe-id">
+                        
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">料理名稱 <span class="text-rose-500">*</span></label>
+                            <input type="text" id="recipe-name" required placeholder="例如：日式咖哩烏龍麵" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">料理類別 <span class="text-rose-500">*</span></label>
+                                <select id="recipe-category" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500">
+                                    <option value="主食一鍋搞定">🍚 主食一鍋搞定</option>
+                                    <option value="營養蛋與豆腐">🍳 營養蛋與豆腐</option>
+                                    <option value="下飯肉類海鮮">🥩 下飯肉類海鮮</option>
+                                    <option value="溫暖湯品燉菜">🍲 溫暖湯品燉菜</option>
+                                    <option value="點心與副食品">🧁 點心與副食品</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">烹飪日期 <span class="text-rose-500">*</span></label>
+                                <input type="date" id="recipe-date" required class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">孩子喜愛評分</label>
+                                <div class="flex items-center gap-1 py-1.5">
+                                    <input type="hidden" id="recipe-rating" value="5">
+                                    <div id="star-container" class="flex text-amber-400 text-base">
+                                        <i class="fa-solid fa-star rating-star" onclick="setRating(1)"></i>
+                                        <i class="fa-solid fa-star rating-star" onclick="setRating(2)"></i>
+                                        <i class="fa-solid fa-star rating-star" onclick="setRating(3)"></i>
+                                        <i class="fa-solid fa-star rating-star" onclick="setRating(4)"></i>
+                                        <i class="fa-solid fa-star rating-star" onclick="setRating(5)"></i>
+                                    </div>
+                                    <span id="rating-text" class="text-[10px] text-slate-400 font-bold ml-1">(5星超愛)</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">烹飪難易度</label>
+                                <select id="recipe-difficulty" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500">
+                                    <option value="1">⭐ 超級簡單 (一鍋到底)</option>
+                                    <option value="2">⭐⭐ 稍微備料 (需要切菜)</option>
+                                    <option value="3">⭐⭐⭐ 繁複工序 (需要控火候)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">主要食材與份量</label>
+                            <textarea id="recipe-ingredients" rows="2" placeholder="例如：烏龍麵 1包, 咖哩塊 1塊, 洋蔥 1/4顆, 肉片 50g" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">做菜心得與孩子挑食反饋</label>
+                            <textarea id="recipe-notes" rows="3" placeholder="例如：洋蔥切碎了，孩子完全沒發現並吃光！下次咖哩水可以少放一點會更濃郁..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 resize-none"></textarea>
+                        </div>
+
+                        <div class="flex gap-2 pt-1">
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-floppy-disk"></i> 儲存此篇日誌
+                            </button>
+                            <button type="button" onclick="resetForm()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-3 py-2 rounded-xl transition-all">
+                                清除
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 右側：歷史日記清單 -->
+                <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <h3 class="font-black text-slate-800 text-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock-rotate-left text-orange-500"></i> 我的廚房歷程
+                        </h3>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="exportData()" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-all">
+                                <i class="fa-solid fa-file-export"></i> 匯出備份
+                            </button>
+                            <button onclick="triggerImport()" class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-all">
+                                <i class="fa-solid fa-file-import"></i> 匯入備份
+                            </button>
+                            <input type="file" id="import-file" class="hidden" onchange="importData(event)">
+                        </div>
+                    </div>
+
+                    <!-- 搜尋做菜紀錄 -->
+                    <div class="relative text-xs">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="search-log" oninput="renderHistoryList()" placeholder="搜尋做過的菜名、食材或心得..." class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500">
+                    </div>
+
+                    <!-- 歷史紀錄容器 -->
+                    <div id="history-container" class="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 經典 100 挑戰庫 (Recipes 100 Tab) -->
+        <section id="content-recipes-100" class="tab-content hidden space-y-6">
+            <!-- 成就解鎖進度條 -->
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-5 rounded-2xl shadow-md border border-slate-700/50 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 w-full md:w-auto">
+                    <div id="achieve-badge-icon" class="bg-amber-400 text-slate-900 text-2xl w-14 h-14 rounded-2xl flex items-center justify-center font-bold shadow-lg animate-bounce">
+                        🏆
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black flex items-center gap-1.5 text-amber-300">
+                            百家常菜挑戰成就系統 <span id="achieve-title-badge" class="bg-amber-400/20 text-amber-300 text-[10px] px-2.5 py-0.5 rounded-full border border-amber-400/30 font-bold">🌱 廚房萌新</span>
+                        </h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">每親手做過並記錄一道挑戰庫菜色，系統將自動解鎖點亮，快朝特級大師邁進吧！</p>
+                    </div>
+                </div>
+                <div class="w-full md:w-64 space-y-1.5">
+                    <div class="flex justify-between text-[11px] font-bold">
+                        <span class="text-slate-300">目前挑戰進度</span>
+                        <span id="achieve-count-text" class="text-amber-300">1 / 100 道</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden border border-slate-600">
+                        <div id="achieve-progress-bar" class="bg-gradient-to-r from-amber-400 to-orange-500 h-full transition-all duration-500" style="width: 1%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 過濾器與搜尋列 -->
+            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                <!-- 橫向子類別篩選 (Pills) -->
+                <div class="flex flex-wrap gap-1.5 text-xs">
+                    <button onclick="filterSubcat('all')" id="pill-subcat-all" class="subcat-pill px-3 py-1.5 rounded-full font-bold transition-all bg-slate-800 text-white">全部挑戰</button>
+                    <button onclick="filterSubcat('one-pot')" id="pill-subcat-one-pot" class="subcat-pill px-3 py-1.5 rounded-full font-bold transition-all text-slate-600 bg-slate-100 hover:bg-slate-200">🍚 一鍋搞定與美味主食</button>
+                    <button onclick="filterSubcat('egg-tofu')" id="pill-subcat-egg-tofu" class="subcat-pill px-3 py-1.5 rounded-full font-bold transition-all text-slate-600 bg-slate-100 hover:bg-slate-200">🍳 營養蛋豆腐與快炒入門</button>
+                    <button onclick="filterSubcat('meat-seafood')" id="pill-subcat-meat-seafood" class="subcat-pill px-3 py-1.5 rounded-full font-bold transition-all text-slate-600 bg-slate-100 hover:bg-slate-200">🥩 經典下飯肉類與海鮮</button>
+                    <button onclick="filterSubcat('soup-stew')" id="pill-subcat-soup-stew" class="subcat-pill px-3 py-1.5 rounded-full font-bold transition-all text-slate-600 bg-slate-100 hover:bg-slate-200">🍲 溫暖湯品與元氣燉菜</button>
+                    <button onclick="filterSubcat('snack-puree')" id="pill-subcat-snack-puree" class="subcat-pill px-3 py-1.5 rounded-full font-bold transition-all text-slate-600 bg-slate-100 hover:bg-slate-200">🧁 孩子最愛點心與副食品</button>
+                </div>
+
+                <div class="flex gap-2 text-xs">
+                    <select id="filter100-status" onchange="render100Recipes()" class="px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500">
+                        <option value="all">所有解鎖狀態</option>
+                        <option value="unlocked">🏆 已解鎖</option>
+                        <option value="locked">🔒 尚未挑戰</option>
+                    </select>
+                    <input type="text" id="search100" oninput="render100Recipes()" placeholder="搜尋100大食譜..." class="px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500">
+                </div>
+            </div>
+
+            <!-- 100 道家常菜格狀卡片區 -->
+            <div id="recipes-100-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- 由 JS 渲染 100 道料理卡片 -->
+            </div>
+        </section>
+
+        <!-- 3. 學習與備料指南 (Guide Tab) -->
         <section id="content-guide" class="tab-content hidden space-y-6">
             <!-- 核心三大區塊：學習地圖、備料秘訣、孩子飲食原則 -->
-<!-- ... existing code ... -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 學習地圖 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h3 class="font-black text-slate-800 text-sm flex items-center gap-1.5"><i class="fa-solid fa-map-location-dot text-emerald-500"></i> 新手廚藝三階梯</h3>
+                    <ul class="space-y-3 text-xs text-slate-600">
+                        <li class="flex items-start gap-2"><span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">階梯 1</span> <span><strong>一鍋燉煮與電鍋法：</strong>不需高超火候掌控，將食材依熟成慢到快下鍋，不燒焦不失手。</span></li>
+                        <li class="flex items-start gap-2"><span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">階梯 2</span> <span><strong>黃金比例調味法：</strong>忘記「適量」，日式醬汁完美比例為「醬油 1 : 味醂 1 : 水 4」。</span></li>
+                        <li class="flex items-start gap-2"><span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">階梯 3</span> <span><strong>肉品先醃與去腥：</strong>肉類先用少許米酒或太白粉醃製 5 分鐘，煎出來滑嫩不乾柴，孩子好吞嚥。</span></li>
+                    </ul>
+                </div>
+
+                <!-- 備料秘訣 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h3 class="font-black text-slate-800 text-sm flex items-center gap-1.5"><i class="fa-solid fa-snowflake text-sky-500"></i> 10分鐘批次備料大法</h3>
+                    <ul class="space-y-3 text-xs text-slate-600">
+                        <li class="flex items-start gap-2"><span class="bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded">秘訣 1</span> <span><strong>蔬菜耐凍冷凍庫：</strong>洋蔥絲、紅蘿蔔丁、高麗菜片，切好直接真空冷凍，煮湯時免退冰直接抓一把丟入。</span></li>
+                        <li class="flex items-start gap-2"><span class="bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded">秘訣 2</span> <span><strong>絞肉分量拍平：</strong>買回的肉末按每餐份量（約 50-80g）裝入小夾鏈袋壓扁冷凍，退冰只需泡水 5 分鐘。</span></li>
+                        <li class="flex items-start gap-2"><span class="bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded">秘訣 3</span> <span><strong>辛香料冷凍磚：</strong>將蒜末、薑泥、蔥花調和少許食用油，放入製冰盒冷凍，隨手拿一塊就能爆香。</span></li>
+                    </ul>
+                </div>
+
+                <!-- 挑食防線 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h3 class="font-black text-slate-800 text-sm flex items-center gap-1.5"><i class="fa-solid fa-child text-indigo-500"></i> 寶寶防挑食「隱形術」</h3>
+                    <ul class="space-y-3 text-xs text-slate-600">
+                        <li class="flex items-start gap-2"><span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded">原則 1</span> <span><strong>纖維剪碎法：</strong>青菜咬不動是挑食元兇。善用食物剪或調理機，將青梗菜碎、高麗菜末混入蛋液煎成烘蛋。</span></li>
+                        <li class="flex items-start gap-2"><span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded">原則 2</span> <span><strong>甜味蓋酸苦：</strong>胡蘿蔔與青椒慢火炒透會釋放天然糖分。跟甜玉米粒、南瓜泥混搭能完美掩蓋草腥味。</span></li>
+                        <li class="flex items-start gap-2"><span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded">原則 3</span> <span><strong>不強迫飲食：</strong>遇到挑食，在本系統記錄孩子討厭的口感，AI 將為您量身定制升級版改良食譜！</span></li>
+                    </ul>
+                </div>
+            </div>
+
             <!-- 麗克特調理機神級應用指南專區 -->
             <div class="bg-gradient-to-br from-pink-50 to-orange-50 p-6 rounded-2xl border border-pink-200 shadow-xs">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 border-b border-pink-100 pb-4">
@@ -45,7 +345,117 @@
                 <!-- 內容容器 -->
                 <div id="recolte-recipes-container" class="bg-white p-5 rounded-2xl border border-pink-100 shadow-xs">
                     <!-- 1. 藍莓優格 -->
-<!-- ... existing code ... -->
+                    <div id="recolte-blueberry" class="recolte-recipe-content space-y-4">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <h4 class="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> 藍莓優格鮮奶果昔（一鍋兩用美味冰棒）
+                            </h4>
+                            <span class="bg-pink-50 text-pink-700 text-[10px] px-2.5 py-0.5 rounded-full font-bold">⏱️ 製作時間：3分鐘</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="bg-pink-50/30 p-4 rounded-xl border border-pink-100/40 space-y-3">
+                                <h5 class="text-xs font-bold text-pink-800 flex items-center gap-1"><i class="fa-solid fa-basket-shopping"></i> 食材與精準份量</h5>
+                                <ul class="text-xs text-gray-600 space-y-2">
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>冷凍藍莓</span> <span class="font-bold text-pink-700">50g</span></li>
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>無糖優格</span> <span class="font-bold text-pink-700">80g</span></li>
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>鮮奶 (或配方奶)</span> <span class="font-bold text-pink-700">50ml</span></li>
+                                    <li class="flex justify-between pb-1"><span>熟透香蕉 (去皮切小片)</span> <span class="font-bold text-pink-700">1/2 根</span></li>
+                                </ul>
+                                <p class="text-[10px] text-pink-600 italic bg-white p-2 rounded-lg border border-pink-100/50 leading-relaxed">💡 小撇步：熟香蕉自帶果糖，能完美平衡優格與藍莓的微酸感，完全不需額外加一粒砂糖！</p>
+                            </div>
+                            <div class="md:col-span-2 space-y-3">
+                                <h5 class="text-xs font-bold text-gray-700 flex items-center gap-1"><i class="fa-solid fa-circle-info"></i> 麗克特調理機操作步驟</h5>
+                                <ol class="text-xs text-gray-600 space-y-2 list-decimal pl-4 leading-relaxed">
+                                    <li>調理機中裝上 <strong>「四刃不鏽鋼刀頭」</strong>。</li>
+                                    <li>將 50g 冷凍藍莓、80g 無糖優格、50ml 鮮奶及 1/2 根熟香蕉依次放入調理杯中。</li>
+                                    <li><strong>按壓調理機主機，採取「按壓 2 秒、停 1 秒」的方式，重複點按 5-6 次</strong>，快速將藍莓冰塊擊碎。</li>
+                                    <li>最後<strong>長按按壓 10 秒鐘</strong>，使所有食材充分乳化乳融，倒出即是口感如慕斯般順滑的天然藍莓優格果昔！</li>
+                                    <li><strong>【冰棒變化型】</strong>：將做好的果昔倒入附贈的矽膠冰棒盒，冷凍 4 小時以上，就是全無添加劑、低脂健康的美味雪糕，孩子超瘋狂！</li>
+                                </ol>
+                                <div class="pt-3 border-t border-gray-100 flex justify-end">
+                                    <button onclick="importRecolteToTracker('藍莓優格果昔與冰棒', '點心與副食品', '冷凍藍莓 50g, 無糖優格 80g, 鮮奶 50ml, 香蕉 1/2根', '使用麗克特調理機四刃刀頭，點按擊碎藍莓後長打10秒。香蕉和藍莓完美中和酸甜，口感極佳！倒入冰架冷凍做成冰棒，孩子愛不釋手。')" class="text-xs bg-pink-500 hover:bg-pink-600 text-white font-bold py-1.5 px-4 rounded-xl shadow-xs transition-all flex items-center gap-1">
+                                        <i class="fa-solid fa-file-import"></i> 匯入此做菜紀錄
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 隱形蔬菜鮮蝦肉煎餅 -->
+                    <div id="recolte-veggie" class="recolte-recipe-content hidden space-y-4">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <h4 class="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> 隱形蔬菜鮮蝦雞肉煎餅 (防挑食肉餅)
+                            </h4>
+                            <span class="bg-pink-50 text-pink-700 text-[10px] px-2.5 py-0.5 rounded-full font-bold">⏱️ 製作時間：10分鐘</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="bg-pink-50/30 p-4 rounded-xl border border-pink-100/40 space-y-3">
+                                <h5 class="text-xs font-bold text-pink-800 flex items-center gap-1"><i class="fa-solid fa-basket-shopping"></i> 食材與精準份量</h5>
+                                <ul class="text-xs text-gray-600 space-y-2">
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>無骨雞胸肉/雞腿肉</span> <span class="font-bold text-pink-700">100g</span></li>
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>鮮蝦仁 (去沙線)</span> <span class="font-bold text-pink-700">50g (約4-5隻)</span></li>
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>胡蘿蔔丁 + 綠花椰</span> <span class="font-bold text-pink-700">共 30g</span></li>
+                                    <li class="flex justify-between pb-1"><span>太白粉 / 白胡椒粉</span> <span class="font-bold text-pink-700">1小匙 / 微量</span></li>
+                                </ul>
+                                <p class="text-[10px] text-pink-600 italic bg-white p-2 rounded-lg border border-pink-100/50 leading-relaxed">💡 小撇步：調理機的高速刀片能完美切碎花椰菜與胡蘿蔔的難嚥纖維，與海鮮肉丸融為一體，孩子完全吃不出來蔬菜存在！</p>
+                            </div>
+                            <div class="md:col-span-2 space-y-3">
+                                <h5 class="text-xs font-bold text-gray-700 flex items-center gap-1"><i class="fa-solid fa-circle-info"></i> 麗克特調理機操作步驟</h5>
+                                <ol class="text-xs text-gray-600 space-y-2 list-decimal pl-4 leading-relaxed">
+                                    <li>調理機中裝入 <strong>「四刃不鏽鋼刀頭」</strong>。</li>
+                                    <li>先放入<strong>胡蘿蔔丁與花椰菜</strong>，採取「按壓主機 1 秒、停 1 秒」的點按手法，按壓約 3 下，把蔬菜打成細小碎粒。</li>
+                                    <li>接著將<strong>切大塊的雞胸肉、去沙線蝦仁、1大匙太白粉以及一小撮鹽</strong>一同丟入調理杯。</li>
+                                    <li><strong>長按按壓主機 8-10 秒</strong>。此時肉品與蔬菜、蝦肉會結合成極具彈性與黏稠度的金黃粉嫩肉泥。</li>
+                                    <li>用湯匙挖出，用手整形成約 2 公分厚的扁平小肉餅。</li>
+                                    <li>平底鍋倒入一匙薄油，用微火將肉餅蓋鍋蓋兩面煎烤 3 分鐘至熟透。帶有自然蝦甜與蔬菜香的無添加煎餅即刻完成！</li>
+                                </ol>
+                                <div class="pt-3 border-t border-gray-100 flex justify-end">
+                                    <button onclick="importRecolteToTracker('隱形蔬菜鮮蝦雞肉煎餅', '下飯肉類海鮮', '雞胸肉 100g, 鮮蝦仁 50g, 蘿蔔丁+花椰菜 30g, 太白粉 1小匙', '利用麗克特四刃刀頭先將花椰菜胡蘿蔔碎化，再與雞肉蝦肉混合打出黏性彈性。小火蓋蓋乾煎成肉餅，蝦甜味超誘人，蔬菜隱形大成功！')" class="text-xs bg-pink-500 hover:bg-pink-600 text-white font-bold py-1.5 px-4 rounded-xl shadow-xs transition-all flex items-center gap-1">
+                                        <i class="fa-solid fa-file-import"></i> 匯入此做菜紀錄
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 濃郁南瓜濃湯 -->
+                    <div id="recolte-pumpkin" class="recolte-recipe-content hidden space-y-4">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <h4 class="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> 濃郁奶油南瓜起司濃湯 (西餐免勾芡級)
+                            </h4>
+                            <span class="bg-pink-50 text-pink-700 text-[10px] px-2.5 py-0.5 rounded-full font-bold">⏱️ 製作時間：8分鐘</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="bg-pink-50/30 p-4 rounded-xl border border-pink-100/40 space-y-3">
+                                <h5 class="text-xs font-bold text-pink-800 flex items-center gap-1"><i class="fa-solid fa-basket-shopping"></i> 食材與精準份量</h5>
+                                <ul class="text-xs text-gray-600 space-y-2">
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>帶皮南瓜 (切塊蒸熟)</span> <span class="font-bold text-pink-700">120g</span></li>
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>高鈣起司片</span> <span class="font-bold text-pink-700">1 片</span></li>
+                                    <li class="flex justify-between border-b border-pink-50 pb-1"><span>鮮奶</span> <span class="font-bold text-pink-700">100ml</span></li>
+                                    <li class="flex justify-between pb-1"><span>溫熱高湯 / 開水</span> <span class="font-bold text-pink-700">50ml</span></li>
+                                </ul>
+                                <p class="text-[10px] text-pink-600 italic bg-white p-2 rounded-lg border border-pink-100/50 leading-relaxed">💡 小撇步：利用蒸熟南瓜本身的綿密感代替太白粉或麵粉，不需勾芡也能獲得極致濃稠的完美法式西餐濃湯！</p>
+                            </div>
+                            <div class="md:col-span-2 space-y-3">
+                                <h5 class="text-xs font-bold text-gray-700 flex items-center gap-1"><i class="fa-solid fa-circle-info"></i> 麗克特調理機操作步驟</h5>
+                                <ol class="text-xs text-gray-600 space-y-2 list-decimal pl-4 leading-relaxed">
+                                    <li>調理機中裝上 <strong>「四刃不鏽鋼刀頭」</strong>。</li>
+                                    <li>放入蒸到完全軟爛的<strong>熟南瓜肉、100ml鮮奶及50ml溫高湯</strong>。</li>
+                                    <li><strong>持續按壓主機 10-15 秒</strong>。機器會瞬間將南瓜外皮及南瓜肉徹底磨碎打散，與液體高度融合呈細膩無顆粒的金黃色絲滑乳狀。</li>
+                                    <li>將打好的南瓜濃汁倒入小湯鍋，加入 <strong>一片起司片及一小匙鹽</strong>，微弱火慢慢攪拌加熱至起司融化（滾起即可關火）。</li>
+                                    <li>奶香與南瓜天然甜味爆發，孩子可以當作下午茶點心或者搭配烤吐司條沾著吃！</li>
+                                </ol>
+                                <div class="pt-3 border-t border-gray-100 flex justify-end">
+                                    <button onclick="importRecolteToTracker('奶油南瓜起司濃湯', '溫暖湯品燉菜', '熟南瓜 120g, 起司片 1片, 鮮奶 100ml, 溫高湯 50ml', '熟南瓜加牛奶高湯用麗克特四刃刀頭高速攪打15秒成滑順無渣南瓜漿。倒回小鍋加入起司片溫火煮融。口感濃郁綿密，孩子喝完一整碗！')" class="text-xs bg-pink-500 hover:bg-pink-600 text-white font-bold py-1.5 px-4 rounded-xl shadow-xs transition-all flex items-center gap-1">
+                                        <i class="fa-solid fa-file-import"></i> 匯入此做菜紀錄
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 4. 嬰幼兒蘋果雞蛋黃細泥 -->
                     <div id="recolte-apple" class="recolte-recipe-content hidden space-y-4">
                         <div class="flex justify-between items-center border-b border-gray-100 pb-2">
@@ -135,7 +545,619 @@
             </div>
 
             <!-- 自行規劃的學習清單挑戰 -->
-<!-- ... existing code ... -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                <h3 class="font-black text-slate-800 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                    <i class="fa-solid fa-circle-play text-red-500 animate-pulse"></i> 優質廚藝學習影音資源
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div onclick="openResource('https://www.youtube.com/@MASAABC', 'MASA的料理ABC')" class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-orange-50 hover:border-orange-200 transition-all">
+                        <div class="w-9 h-9 rounded-full bg-pink-100 text-pink-600 font-black text-sm flex items-center justify-center">M</div>
+                        <div><h4 class="text-xs font-black text-slate-800">MASAの料理ABC</h4><p class="text-[9px] text-slate-400 mt-0.5">超溫柔細緻日式與新手家常</p></div>
+                    </div>
+                    <div onclick="openResource('https://www.youtube.com/@JamesChef 流', '詹姆士姆士流')" class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-orange-50 hover:border-orange-200 transition-all">
+                        <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-600 font-black text-sm flex items-center justify-center">詹</div>
+                        <div><h4 class="text-xs font-black text-slate-800">詹姆士姆士流</h4><p class="text-[9px] text-slate-400 mt-0.5">教新手大腦與調味配比秘技</p></div>
+                    </div>
+                    <div onclick="openResource('https://www.youtube.com/@menustudy', '菜單研究所')" class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-orange-50 hover:border-orange-200 transition-all">
+                        <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 font-black text-sm flex items-center justify-center">菜</div>
+                        <div><h4 class="text-xs font-black text-slate-800">菜單研究所</h4><p class="text-[9px] text-slate-400 mt-0.5">極度適合小家庭與備料優化</p></div>
+                    </div>
+                    <div onclick="openResource('https://icook.tw/categories/685', '愛料理・小孩最愛')" class="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-orange-50 hover:border-orange-200 transition-all">
+                        <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 font-black text-sm flex items-center justify-center">愛</div>
+                        <div><h4 class="text-xs font-black text-slate-800">愛料理・兒童專區</h4><p class="text-[9px] text-slate-400 mt-0.5">台灣最大幼兒偏食食譜社群</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. AI 智慧助手 (AI Assistant Tab) -->
+        <section id="content-ai-assistant" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 左側：API Key 設置與操作說明 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                    <h3 class="font-black text-slate-800 text-sm flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                        <i class="fa-solid fa-key text-indigo-500 animate-pulse"></i> Gemini API Key 設置
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="bg-indigo-50 text-indigo-800 p-3.5 rounded-xl border border-indigo-100 leading-relaxed">
+                            <i class="fa-solid fa-circle-info mr-1"></i> <strong>貼心說明：</strong>為保障隱私安全，您填寫的 API 金鑰<strong>僅儲存在您這台裝置的瀏覽器中</strong>（LocalStorage），絕不會外洩或上傳到 GitHub！
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">您的 Gemini API Key</label>
+                            <input type="password" id="gemini-api-key" placeholder="貼上您的 AIzaSy... 金鑰" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div class="pt-1 flex gap-2">
+                            <button onclick="saveApiKey()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-lg flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> 儲存金鑰
+                            </button>
+                            <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-1.5 px-3 rounded-lg">
+                                清除金鑰
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-relaxed italic border-t border-slate-100 pt-3">
+                            💡 還沒有金鑰？請查看右側 <span class="font-bold text-slate-500">「學習與備料指南」</span> 下方的說明，Google 提供每分鐘免費 15 次的慷慨額度，100% 免費申請喔！
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 右側：AI 兩大魔法核心功能 -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- 核心 1：冰箱剩食變身魔法 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                        <h4 class="font-black text-slate-800 text-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i> AI 冰箱剩食變身魔法
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">手邊有的零碎食材與分量</label>
+                                    <input type="text" id="ai-fridge-ingredients" placeholder="例如：番茄 1顆, 雞里肌肉片 50g, 高麗菜" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">孩子飲食特點或年齡</label>
+                                    <select id="ai-fridge-child-profile" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500">
+                                        <option value="1歲寶寶 (需要極軟綿、無鹽微鹽微小碎丁)">👶 1 歲寶寶 (極軟綿無調味碎丁)</option>
+                                        <option value="2-3歲幼兒 (練習咬咀嚼、喜歡多色彩、少油鹽)">👦 2-3 歲幼兒 (繽紛色彩易咀嚼)</option>
+                                        <option value="4-6歲學齡前 (挑食高發期、不喜葉菜與特定苦味、口感需精緻)">👧 4-6 歲兒童 (防挑食隱形蔬菜術)</option>
+                                    </select>
+                                </div>
+                                <button onclick="runFridgeMagic()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-2 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-hat-wizard"></i> 變身幼兒美味食譜
+                                </button>
+                            </div>
+                            
+                            <!-- 魔法產出結果面板 -->
+                            <div class="relative min-h-[160px] bg-slate-50 rounded-2xl border border-slate-200 p-4 flex flex-col justify-center items-center">
+                                <div id="fridge-result-placeholder" class="text-center space-y-1">
+                                    <i class="fa-solid fa-utensils text-slate-300 text-3xl mb-1.5"></i>
+                                    <p class="font-bold text-slate-400">尚未施展冰箱魔法</p>
+                                    <p class="text-[10px] text-slate-400">在左側填入剩餘食材，AI 將秒速調研出最適合孩子的料理。</p>
+                                </div>
+                                <div id="fridge-result-loading" class="hidden text-center space-y-2">
+                                    <div class="flex justify-center items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                        <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                        <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+                                    </div>
+                                    <p class="text-[10px] text-indigo-600 font-bold animate-pulse">正在為您翻轉剩餘食材中...</p>
+                                </div>
+                                <div id="fridge-result-display" class="hidden w-full text-xs space-y-3 text-left">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 核心 2：挑食退縮與做菜失敗救星 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                        <h4 class="font-black text-slate-800 text-sm flex items-center gap-1.5">
+                            <i class="fa-solid fa-heart-crack text-rose-500"></i> AI 寶寶偏食退縮與煮焦失敗救星
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">發生了什麼令人沮喪的事？</label>
+                                    <textarea id="ai-fail-problem" rows="3" placeholder="例如：昨天的番茄炒蛋，雞蛋太老、番茄皮太厚，小孩吃一口就全部吐了出來，好挫折..." class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                                </div>
+                                <button onclick="runSaviorCoach()" class="w-full bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-bold py-2 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-life-ring"></i> 尋求溫柔主廚指導
+                                </button>
+                            </div>
+
+                            <!-- 救星產出結果面板 -->
+                            <div class="relative min-h-[160px] bg-slate-50 rounded-2xl border border-slate-200 p-4 flex flex-col justify-center items-center">
+                                <div id="savior-result-placeholder" class="text-center space-y-1">
+                                    <i class="fa-solid fa-graduation-cap text-slate-300 text-3xl mb-1.5"></i>
+                                    <p class="font-bold text-slate-400">大師教練在線聆聽</p>
+                                    <p class="text-[10px] text-slate-400">不論是煮燒焦、肉過柴、還是孩子挑食吐出來，五星主廚與營養師將化身溫柔教練為您支招。</p>
+                                </div>
+                                <div id="savior-result-loading" class="hidden text-center space-y-2">
+                                    <div class="flex justify-center items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                        <div class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                        <div class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+                                    </div>
+                                    <p class="text-[10px] text-rose-600 font-bold animate-pulse">溫柔主教練正在審閱您的廚房日記...</p>
+                                </div>
+                                <div id="savior-result-display" class="hidden w-full text-xs space-y-3 text-left">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 底部行動導覽（僅手機移動端顯示） -->
+    <footer class="md:hidden bg-white border-t border-slate-200 fixed bottom-0 inset-x-0 z-40 py-2 shadow-lg">
+        <div class="flex justify-around items-center text-[10px] font-bold text-slate-500">
+            <button onclick="switchTab('tracker')" id="btn-m-tracker" class="flex flex-col items-center gap-0.5 text-orange-600">
+                <i class="fa-solid fa-book-open text-base"></i><span>日記統計</span>
+            </button>
+            <button onclick="switchTab('recipes-100')" id="btn-m-recipes-100" class="flex flex-col items-center gap-0.5">
+                <i class="fa-solid fa-trophy text-base"></i><span>百大挑戰</span>
+            </button>
+            <button onclick="switchTab('guide')" id="btn-m-guide" class="flex flex-col items-center gap-0.5">
+                <i class="fa-solid fa-lightbulb text-base"></i><span>指南專區</span>
+            </button>
+            <button onclick="switchTab('ai-assistant')" id="btn-m-ai-assistant" class="flex flex-col items-center gap-0.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-base"></i><span>AI助手</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- 全球通用自製 Toast 彈窗 -->
+    <div id="toast" class="hidden fixed bottom-20 md:bottom-6 right-6 bg-slate-800 text-white text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 z-50 transform translate-y-4 opacity-0 transition-all duration-300">
+        <span id="toast-icon" class="text-orange-400"><i class="fa-solid fa-circle-info"></i></span>
+        <span id="toast-message" class="font-bold"></span>
+    </div>
+
+    <!-- 沙盒安全連結引導 Modal -->
+    <div id="link-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-md w-full p-5 rounded-2xl border border-slate-200 shadow-xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h4 class="font-black text-slate-800 text-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-exclamation text-amber-500"></i> 安全開啟影音教學
+                </h4>
+                <button onclick="closeLinkModal()" class="text-slate-400 hover:text-slate-600 text-base"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                由於您目前可能在 GitHub 的 sandbox 或內嵌 Iframe 環境中瀏覽網頁，瀏覽器預設不允許直接彈出外部新分頁。為此，我們為您產生了備用網址：
+            </p>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <input type="text" id="modal-link-input" readonly class="w-full bg-transparent text-[11px] text-slate-600 focus:outline-none">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="copyModalLink()" class="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 shadow-md">
+                    <i class="fa-solid fa-copy"></i> 一鍵複製網址
+                </button>
+                <button onclick="closeLinkModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 px-4 rounded-xl text-xs">
+                    關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 刪除確認 Modal -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-sm w-full p-5 rounded-2xl border border-slate-200 shadow-xl space-y-4">
+            <div class="text-center space-y-2">
+                <div class="bg-rose-50 text-rose-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-trash"></i></div>
+                <h4 class="font-black text-slate-800 text-sm">確認要刪除這筆料理日誌嗎？</h4>
+                <p class="text-[11px] text-slate-400">刪除後此做菜紀錄將永久消失，無法挽回喔。</p>
+            </div>
+            <div class="flex gap-2.5">
+                <button id="btn-confirm-delete" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 rounded-xl text-xs">確認刪除</button>
+                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 rounded-xl text-xs">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        //        100 道幼兒經典料理數據庫
+        // ==========================================
+        const top100Recipes = [
+            // Phase 1: 一鍋搞定與美味主食 (1-20)
+            { id: 1, name: "咖哩烏龍麵", subcat: "one-pot", ingredients: "烏龍麵 1包, 咖哩塊 1塊, 洋蔥 1/4顆, 豬肉片 50g", tip: "洋蔥切極碎在炒熱時會完美焦糖化，提供甜味並自動融入湯中，防挑食大絕招！", ytQuery: "MASA 咖哩烏龍麵 做法" },
+            { id: 2, name: "鮭魚香菇炊飯", subcat: "one-pot", ingredients: "鮮鮭魚菲力 80g, 鮮香菇 2朵, 白米 1杯, 高湯 1杯", tip: "電鍋跳起後，將鮭魚肉用叉子輕輕壓碎混拌，香菇鮮甜味會被白米完全吸收。", ytQuery: "MASA 鮭魚炊飯 做法" },
+            { id: 3, name: "電鍋肉餅蒸飯", subcat: "one-pot", ingredients: "白米 1杯, 豬絞肉 80g, 甜玉米粒 20g, 醬油 1小匙", tip: "豬絞肉先用醬油與少許太白粉抓醃，放於米飯上同蒸，米粒充滿肉香！", ytQuery: "詹姆士 肉餅蒸飯 做法" },
+            { id: 4, name: "日式親子丼", subcat: "one-pot", ingredients: "去骨雞腿肉 80g, 洋蔥 1/4顆, 雞蛋 1顆, 鰹魚醬油 20ml", tip: "蛋液分成兩次淋入：第一次定型，第二次淋完立刻關火悶 30 秒最滑嫩。", ytQuery: "MASA 親子丼 做法" },
+            { id: 5, name: "鮮蝦翡翠炒飯", subcat: "one-pot", ingredients: "冷飯 1碗, 去殼蝦仁 5隻, 菠菜葉(切碎) 15g, 雞蛋 1顆", tip: "菠菜洗淨用滾水燙過切成極碎，與蛋液混合先炒香，能去除菠菜的澀味。", ytQuery: "菜單研究所 蝦仁炒飯" },
+            { id: 6, name: "肉燥番茄軟麵", subcat: "one-pot", ingredients: "熟肉燥 2大匙, 番茄 1/2顆, 關廟麵 1片, 青江菜 20g", tip: "番茄先下鍋用微油炒到糊化釋放茄紅素，再加水燉煮麵條，酸甜可口！", ytQuery: "番茄肉醬麵 幼兒" },
+            { id: 7, name: "香菇滑雞燉飯", subcat: "one-pot", ingredients: "去骨雞丁 80g, 乾香菇 2朵, 白米 1杯, 薑絲 微量", tip: "香菇水不要丟，直接代替白開水倒入電鍋中烹煮，香氣極度濃郁！", ytQuery: "香菇滑雞飯 做法" },
+            { id: 8, name: "香蕉燕麥牛奶粥", subcat: "one-pot", ingredients: "即食燕麥 40g, 鮮奶 120ml, 熟香蕉 1/2根, 葡萄乾 少許", tip: "香蕉直接用湯匙在碗裡壓碎，與熱牛奶燕麥拌勻即是 5 分鐘高鈣早餐。", ytQuery: "燕麥粥 寶寶點心 做法" },
+            { id: 9, name: "翡翠吻仔魚粥", subcat: "one-pot", ingredients: "白粥 1碗, 吻仔魚 20g, 莧菜(切碎) 20g, 薑末 微量", tip: "莧菜含有豐富鐵質。切成極碎末跟吻仔魚一起燉粥，孩子不會挑食吐草葉。", ytQuery: "莧菜吻仔魚粥 做法" },
+            { id: 10, name: "香奶白醬雞肉麵", subcat: "one-pot", ingredients: "義大利麵 50g, 雞胸肉丁 50g, 鮮乳 80ml, 起司片 1片", tip: "不需炒麵粉白醬！直接在煮熟的義大利麵中倒鮮乳與一片起司微火融化即可。", ytQuery: "簡單奶油雞肉義大利麵" },
+            { id: 11, name: "南瓜雞肉軟飯", subcat: "one-pot", ingredients: "南瓜丁 50g, 雞里肌肉泥 50g, 熟白飯 1小碗, 高湯 80ml", tip: "南瓜蒸透後用叉子壓成泥狀，與白飯高湯慢火燉煮收汁，金黃色最能吸引食慾。", ytQuery: "寶寶南瓜雞肉粥 做法" },
+            { id: 12, name: "鳳梨火腿炒飯", subcat: "one-pot", ingredients: "鳳梨丁 20g, 火腿丁 15g, 雞蛋 1顆, 冷飯 1碗", tip: "鳳梨選用甜度高的金鑽鳳梨，利用天然酸甜激發孩子食慾，肉質不易膩。", ytQuery: "鳳梨炒飯 做法" },
+            { id: 13, name: "電鍋香菇蒸肉餅飯", subcat: "one-pot", ingredients: "米 1杯, 絞肉 80g, 香菇 1朵, 醬油/太白粉 各一小匙", tip: "肉餅中塞入一匙香菇碎，置於洗好的米上一起煮，飯粒會吸收香醇肉湯！", ytQuery: "電鍋肉餅飯 做法" },
+            { id: 14, name: "櫻花蝦高麗菜飯", subcat: "one-pot", ingredients: "米 1杯, 櫻花蝦 5g, 高麗菜(切小片) 50g, 紅蘿蔔絲 微量", tip: "櫻花蝦先下乾鍋小火炒出焦香，再跟白米與高麗菜一同放入電鍋燉煮。", ytQuery: "古早味高麗菜飯 電鍋" },
+            { id: 15, name: "番茄牛肉燴飯", subcat: "one-pot", ingredients: "牛五花片 60g, 番茄 1/2顆, 洋蔥 1/4顆, 太白粉水 少許", tip: "牛肉片先用太白粉與少許醬油醃製，炒熟時最滑嫩，完全不會乾柴難嚼。", ytQuery: "番茄牛肉燴飯 做法" },
+            { id: 16, name: "地瓜燕麥軟飯", subcat: "one-pot", ingredients: "地瓜丁 50g, 燕麥 20g, 白米 1/2杯, 開水 1.2杯", tip: "地瓜與白米燕麥一同放電鍋。地瓜的清甜讓整碗軟飯不需要任何調味。", ytQuery: "地瓜燕麥 寶寶副食" },
+            { id: 17, name: "高麗菜豬肉水餃", subcat: "one-pot", ingredients: "水餃皮 10張, 豬絞肉 80g, 高麗菜末 40g, 薑泥 一撮", tip: "高麗菜撒微量鹽抓出水後擠乾再與絞肉混合，水餃吃起來多汁且菜皮不易破。", ytQuery: "手工水餃 幼兒食譜" },
+            { id: 18, name: "西洋芹牛肉燉飯", subcat: "one-pot", ingredients: "洋芹末 15g, 牛肉末 50g, 白飯 1小碗, 番茄糊 1大匙", tip: "西洋芹先用麗克特打成極碎，炒牛肉末與番茄糊，完全吃不出芹菜纖維！", ytQuery: "牛肉燉飯 寶寶版" },
+            { id: 19, name: "翡翠海鮮粥", subcat: "one-pot", ingredients: "白飯 1碗, 去殼蝦仁 4隻, 鯛魚片 30g, 芹菜末/蛋花 各少許", tip: "海鮮起鍋前 1 分鐘才下鍋，保證海鮮鮮甜滑嫩且魚片不會碎裂。", ytQuery: "海鮮粥 做法 詹姆士" },
+            { id: 20, name: "海鮮烏龍湯麵", subcat: "one-pot", ingredients: "烏龍麵 1包, 鮮蝦 2隻, 蛤蜊 3顆, 青菜 20g, 鰹魚露 20ml", tip: "蛤蜊湯頭充滿天然鹹鮮，鰹魚露只需加入少許就能調出完美日式湯底。", ytQuery: "日式海鮮烏龍麵 做法" },
+
+            // Phase 2: 營養蛋豆腐與快炒入門 (21-40)
+            { id: 21, name: "日式茶碗蒸", subcat: "egg-tofu", ingredients: "雞蛋 1顆, 溫昆布高湯 120ml, 蛤蜊 1顆", tip: "蛋與高湯比例為黃金 1 : 2.5，過篩後用小火或電鍋蓋子留小縫，蒸出無孔布丁滑嫩感！", ytQuery: "詹姆士 茶碗蒸 做法" },
+            { id: 22, name: "番茄炒蛋", subcat: "egg-tofu", ingredients: "番茄 1顆, 雞蛋 2顆, 蔥花 少許, 砂糖 1/2小匙", tip: "番茄先下鍋用油炒出橘紅汁液，起鍋前放少許砂糖，酸甜滋味讓小兒大開胃！", ytQuery: "番茄炒蛋 詹姆士 做法" },
+            { id: 23, name: "肉末嫩豆腐", subcat: "egg-tofu", ingredients: "嫩豆腐 1盒, 豬絞肉 40g, 醬油 1大匙, 蔥花 少許", tip: "嫩豆腐直接用湯匙在鍋中切成小塊，利用肉湯小火悶煮 3 分鐘，軟糯下飯。", ytQuery: "肉末豆腐 簡單做法" },
+            { id: 24, name: "鮮蝦滑蛋", subcat: "egg-tofu", ingredients: "蝦仁 6隻, 雞蛋 2顆, 太白粉水 1大匙, 牛奶 1大匙", tip: "蛋液中加入 1 大匙鮮奶與微量太白粉水，大火快炒至 7 分熟立刻起鍋最滑溜。", ytQuery: "蝦仁滑蛋 MASA 做法" },
+            { id: 25, name: "彩色三色蛋", subcat: "egg-tofu", ingredients: "雞蛋 2顆, 鹹蛋黃 1個, 皮蛋 1/2個, 米酒 1小匙", tip: "皮蛋先蒸熟定型再切丁，放入方形模具倒入蛋液一同蒸熟，切片色彩繽紛！", ytQuery: "三色蛋 做法 詹姆士" },
+            { id: 26, name: "香軟洋蔥炒蛋", subcat: "egg-tofu", ingredients: "洋蔥 1/2顆, 雞蛋 2顆, 鹽 少許", tip: "洋蔥必須慢火炒到半透明（約 5 分鐘），徹底釋放甜味後，再倒入蛋液炒熟。", ytQuery: "洋蔥炒蛋 做法" },
+            { id: 27, name: "蒸芙蓉豆腐", subcat: "egg-tofu", ingredients: "芙蓉豆腐 1盒, 吻仔魚 10g, 香油/鰹魚醬油 少許", tip: "芙蓉豆腐淋上微量鰹魚露，撒上少許吻仔魚入電鍋蒸熱，就是無油高鐵的一餐。", ytQuery: "芙蓉豆腐 蒸 做法" },
+            { id: 28, name: "紅燒嫩豆腐", subcat: "egg-tofu", ingredients: "板豆腐 1塊, 醬油 1大匙, 砂糖 1/2小匙, 蔥段 少許", tip: "板豆腐切厚片煎到兩面金黃，倒入醬油與糖水收汁，比嫩豆腐更有豆香與咬勁。", ytQuery: "紅燒豆腐 做法" },
+            { id: 29, name: "翡翠豆腐羹", subcat: "egg-tofu", ingredients: "嫩豆腐 1/2盒, 菠菜末 20g, 高湯 150ml, 太白粉水 少許", tip: "菠菜用麗克特打成翠綠細碎泥，倒入豆腐高湯滾開勾薄芡，色彩鮮艷營養滿分。", ytQuery: "翡翠豆腐羹 做法" },
+            { id: 30, name: "金沙豆腐", subcat: "egg-tofu", ingredients: "雞蛋豆腐 1盒, 熟鹹蛋黃 1個, 蔥花 少許", tip: "鹹蛋黃放入袋中捏碎。豆腐煎到金黃取出，將鹹蛋黃炒到冒泡再倒入豆腐裹勻。", ytQuery: "金沙豆腐 做法 MASA" },
+            { id: 31, name: "日式厚玉子燒", subcat: "egg-tofu", ingredients: "雞蛋 3顆, 味醂 1小匙, 砂糖 1/2小匙, 水 20ml", tip: "加入少許太白粉水可讓蛋皮在捲的時候更不易破裂，層次香甜鬆軟。", ytQuery: "玉子燒 做法 詹姆士" },
+            { id: 32, name: "起司烘蛋", subcat: "egg-tofu", ingredients: "雞蛋 2顆, 乳酪絲 15g, 洋蔥末/胡蘿蔔末 各少許", tip: "洋蔥蘿蔔碎先炒熱，倒入蛋液撒上起司絲，蓋上鍋蓋超弱火烘熟，拉絲爆香！", ytQuery: "起司烘蛋 做法" },
+            { id: 33, name: "麻婆豆腐-無辣版", subcat: "egg-tofu", ingredients: "板豆腐 1盒, 豬絞肉 50g, 醬油 1大匙, 番茄醬 1小匙", tip: "用一小匙番茄醬代替辣豆瓣醬，炒出來肉末豆腐帶點微微酸甜，超級下飯。", ytQuery: "無辣麻婆豆腐 做法" },
+            { id: 34, name: "吻仔魚莧菜蒸蛋", subcat: "egg-tofu", ingredients: "雞蛋 1顆, 莧菜碎 15g, 吻仔魚 10g, 高湯 100ml", tip: "莧菜切極碎、吻仔魚洗淨，直接與蛋液和高湯攪拌。一鍋蒸熟高鈣又好吞軟糯。", ytQuery: "莧菜蒸蛋 寶寶" },
+            { id: 35, name: "蟹黃嫩豆腐-胡蘿蔔版", subcat: "egg-tofu", ingredients: "胡蘿蔔 20g, 嫩豆腐 1盒, 蟹肉棒 2根, 高湯 120ml", tip: "將蒸熟胡蘿蔔用調理機磨成細碎黃金泥，代替蟹黃炒香再加豆腐燉煮，美味好玩！", ytQuery: "蟹黃豆腐 做法 詹姆士" },
+            { id: 36, name: "香脆小黃瓜炒蛋", subcat: "egg-tofu", ingredients: "小黃瓜 1/2根, 雞蛋 1顆, 蒜頭 1瓣", tip: "小黃瓜切極薄片，用少許鹽抓醃 3 分鐘後洗乾淨，口感清爽爽脆，小兒愛咬。", ytQuery: "小黃瓜炒蛋 做法" },
+            { id: 37, name: "香煎雞蛋豆腐", subcat: "egg-tofu", ingredients: "雞蛋豆腐 1盒, 蒜蓉醬油膏 少許", tip: "煎豆腐不要急著翻面。搖動平底鍋時豆腐可以滑動再翻面，就能煎出完美金黃。", ytQuery: "香煎雞蛋豆腐 做法" },
+            { id: 38, name: "塔香煎蛋", subcat: "egg-tofu", ingredients: "九層塔葉 10g, 雞蛋 2顆, 麻油 1小匙", tip: "九層塔葉洗淨瀝乾切碎，先下乾鍋炒出香氣後撈出，混入蛋液再煎最香。", ytQuery: "九層塔煎蛋 做法" },
+            { id: 39, name: "柴魚皮蛋豆腐", subcat: "egg-tofu", ingredients: "嫩豆腐 1盒, 皮蛋 1顆, 柴魚片 少許, 醬油膏 少許", tip: "夏天必備涼拌。將豆腐皮蛋用調製搗碎，撒上柴魚，無火也能5分鐘完成。", ytQuery: "皮蛋豆腐 簡單做法" },
+            { id: 40, name: "高鈣吻仔魚烘蛋", subcat: "egg-tofu", ingredients: "吻仔魚 20g, 雞蛋 2顆, 蔥花 少許", tip: "吻仔魚先下乾鍋炒乾水分釋放香氣，再與蛋液混合，小火加蓋慢慢烘乾雙面熟透。", ytQuery: "吻仔魚烘蛋 做法" },
+
+            // Phase 3: 經典下飯肉類與海鮮 (41-60)
+            { id: 41, name: "馬鈴薯燉肉", subcat: "meat-seafood", ingredients: "梅花肉片 80g, 馬鈴薯 1/2顆, 胡蘿蔔 1/4顆, 醬油/味醂/糖 各適量", tip: "馬鈴薯燉到邊角變圓，湯汁轉濃稠時最入味。隔夜加熱肉質更軟糯，孩子必搶！", ytQuery: "MASA 馬鈴薯燉肉 做法" },
+            { id: 42, name: "照燒雞腿排", subcat: "meat-seafood", ingredients: "去骨雞腿排 1片, 醬油 1大匙, 味醂 1大匙, 糖 1/2小匙", tip: "雞腿排皮朝下先下鍋煎逼出雞油，完全不需額外用油。醬汁收乾微黏即成照燒風味。", ytQuery: "詹姆士 照燒雞腿 做法" },
+            { id: 43, name: "蒜泥白肉-薄切版", subcat: "meat-seafood", ingredients: "五花肉片(火鍋用) 100g, 醬油膏 1大匙, 砂糖 1/2小匙, 薑泥 一撮", tip: "選用火鍋肉片川燙，比起整塊五花肉煮熟好切得多，薄片口感細嫩極適合幼兒嚼。", ytQuery: "蒜泥白肉 做法 簡單" },
+            { id: 44, name: "香煎鮭魚菲力", subcat: "meat-seafood", ingredients: "無刺鮭魚排 1塊, 檸檬 1/4個, 鹽 少許", tip: "魚皮朝下先中火煎乾鮭魚油脂，起鍋前淋入幾滴鮮檸檬汁，解膩去腥香噴噴。", ytQuery: "香煎鮭魚 做法 MASA" },
+            { id: 45, name: "酥炸黃金可樂餅", subcat: "meat-seafood", ingredients: "馬鈴薯 1顆, 豬絞肉 30g, 洋蔥末 15g, 麵包粉 20g", tip: "馬鈴薯泥蒸熟後加入炒熱的肉末洋蔥。整形後裹蛋液、麵包粉，可用氣炸鍋更健康。", ytQuery: "日式可樂餅 MASA" },
+            { id: 46, name: "鮮蝦粉絲煲", subcat: "meat-seafood", ingredients: "去殼鮮蝦 6隻, 粉絲 1把, 高湯 150ml, 蒜末/沙茶醬 少許", tip: "粉絲泡軟切兩段。與高湯及少許醬油一同煨煮，讓粉絲吸滿蝦高湯精華。", ytQuery: "鮮蝦粉絲煲 做法 詹姆士" },
+            { id: 47, name: "鹽烤鯖魚", subcat: "meat-seafood", ingredients: "無刺鯖魚 1片, 椒鹽 少許", tip: "鯖魚富含魚油，直接入烤箱皮朝上 200 度烤 10-12 分鐘至微焦，魚油飽滿。", ytQuery: "烤鯖魚 做法" },
+            { id: 48, name: "糖醋鮮魚片", subcat: "meat-seafood", ingredients: "鯛魚片 100g, 番茄醬 1大匙, 糖 1小匙, 太白粉 少許", tip: "鯛魚片裹太白粉煎到外酥內嫩。倒入番茄醬與糖水滾煮一圈，酸甜無刺極安全。", ytQuery: "糖醋魚片 做法" },
+            { id: 49, name: "鳳梨鮮蝦球", subcat: "meat-seafood", ingredients: "蝦仁 8隻, 鳳梨罐頭 1片, 蛋黃 1/2個, 美乃滋 少許", tip: "蝦仁開背吸乾水份，裹少許蛋黃太白粉煎香，起鍋拌鳳梨丁與微量美乃滋，秒空盤！", ytQuery: "鳳梨蝦球 做法 詹姆士" },
+            { id: 50, name: "薑汁燒肉", subcat: "meat-seafood", ingredients: "梅花肉片 80g, 洋蔥絲 1/4顆, 薑泥 1/2小匙, 醬油 1大匙", tip: "薑泥和少許蘋果泥、醬油、米酒混合先醃肉片。洋蔥絲炒熱加肉同炒，微辛香甘甜。", ytQuery: "薑汁燒肉 MASA" },
+            { id: 51, name: "珍珠糯米丸子", subcat: "meat-seafood", ingredients: "糯米 30g, 豬絞肉 100g, 醬油/香油 各一小匙", tip: "肉末加入少許水逆時針打出黏性。整形圓球裹上泡水 1 小時的糯米，電鍋蒸熟即成。", ytQuery: "珍珠丸子 做法 簡單" },
+            { id: 52, name: "清蒸鱸魚菲力", subcat: "meat-seafood", ingredients: "無刺鱸魚片 1塊, 蔥絲 5g, 薑片 2片, 醬油 1大匙", tip: "魚片下墊薑片，中火蒸 6 分鐘，倒掉多餘腥水，擺上蔥絲淋入熱油與醬油。", ytQuery: "清蒸魚 做法 詹姆士" },
+            { id: 53, name: "無辣甜溫宮保雞丁", subcat: "meat-seafood", ingredients: "去骨雞腿丁 100g, 小黃瓜丁 30g, 番茄醬/糖 各適量, 熟花生 少許", tip: "不放辣椒，用番茄醬、糖、醬油調和，加入小黃瓜和去皮雞腿肉爆炒，香甜可口。", ytQuery: "宮保雞丁 幼兒版" },
+            { id: 54, name: "電鍋紅燒獅子頭", subcat: "meat-seafood", ingredients: "絞肉 120g, 豆腐 1/4塊, 豆腐乳/白菜 各少許", tip: "絞肉捏入豆腐末能大幅提升獅子頭軟綿口感。電鍋鋪滿大白菜小火清燉蒸熱。", ytQuery: "紅燒獅子頭 做法" },
+            { id: 55, name: "香煎金黃鱈魚", subcat: "meat-seafood", ingredients: "無刺鱈魚排 1塊, 太白粉 少許, 椒鹽 一撮", tip: "鱈魚片兩面抹微量鹽並拍上一層薄薄的太白粉。大火快煎魚肉，不易散架破皮。", ytQuery: "煎鱈魚 做法" },
+            { id: 56, name: "泰式檸檬魚-兒童版", subcat: "meat-seafood", ingredients: "鯛魚片 100g, 檸檬汁 1大匙, 砂糖 1小匙, 蒜末 1/2小匙", tip: "去除了傳統的魚露與辣椒，只用新鮮檸檬汁、糖和少許蒜蓉蒸鯛魚片，酸甜解暑。", ytQuery: "清蒸檸檬魚 寶寶版" },
+            { id: 57, name: "高鐵香菇滑雞", subcat: "meat-seafood", ingredients: "去骨雞丁 100g, 鮮香菇 2朵, 枸杞 少許, 醬油 1小匙", tip: "雞腿肉用少許太白粉、醬油和枸杞抓醃，放入香菇同盤清蒸，雞肉滑嫩多汁。", ytQuery: "香菇蒸雞 做法" },
+            { id: 58, name: "蜜汁小叉燒", subcat: "meat-seafood", ingredients: "豬里肌肉 120g, 蜂蜜 1大匙, 醬油 1大匙, 蒜頭 1瓣", tip: "里肌肉切條用醬油醃過，入平底鍋慢火煎熟。起鍋前大火刷滿一匙蜂蜜收汁！", ytQuery: "蜜汁叉燒 簡單做法" },
+            { id: 59, name: "鮮烤大蛤蜊", subcat: "meat-seafood", ingredients: "蛤蜊 10顆, 薑絲 少許", tip: "蛤蜊用鋁箔紙包妥，放烤箱 180 度烤 8 分鐘。原汁原味，鹹鮮精華一滴不漏。", ytQuery: "烤蛤蜊 做法" },
+            { id: 60, name: "黃金雞肉薯泥球", subcat: "meat-seafood", ingredients: "雞肉泥 50g, 馬鈴薯泥 80g, 起司碎 15g", tip: "雞肉泥與馬鈴薯泥揉合，中間包起司絲，搓圓入烤箱 190 度 8 分鐘，香濃可口。", ytQuery: "雞肉薯泥球 寶寶副食" },
+
+            // Phase 4: 溫暖湯品與元氣燉菜 (61-80)
+            { id: 61, name: "日式味噌豆腐湯", subcat: "soup-stew", ingredients: "嫩豆腐 1/2盒, 柴魚片 5g, 味噌 1大匙, 蔥花 少許", tip: "味噌不可以直接丟入鍋中。用湯匙盛適量熱水，先將味噌攪散化開後才倒入湯中。", ytQuery: "MASA 味噌湯 做法" },
+            { id: 62, name: "香奶玉米濃湯", subcat: "soup-stew", ingredients: "甜玉米罐頭 1/2罐, 鮮乳 150ml, 高湯 100ml, 雞蛋 1顆", tip: "將半罐玉米用麗克特打碎再跟高湯鮮奶煮，蛋液熄火前一圈淋入，形成金黃蛋花。", ytQuery: "簡單玉米濃湯 做法" },
+            { id: 63, name: "番茄洋蔥燉牛肉湯", subcat: "soup-stew", ingredients: "牛腩/牛肋條 100g, 番茄 1顆, 洋蔥 1/2顆, 鹽 少許", tip: "番茄洋蔥中火先炒軟出水，倒入燙熟的牛肋丁，高壓鍋或電鍋燉 1 小時至完全軟綿。", ytQuery: "番茄牛肉湯 做法" },
+            { id: 64, name: "冬瓜蛤蜊雞湯", subcat: "soup-stew", ingredients: "冬瓜 100g, 蛤蜊 6顆, 雞骨高湯 300ml, 薑絲 少許", tip: "蛤蜊起鍋前 1 分鐘才丟入，蛤蜊殼開立刻關火，冬瓜與高湯的鮮美甘甜能瞬間爆發！", ytQuery: "冬瓜蛤蜊雞湯 做法" },
+            { id: 65, name: "百合排骨蘿蔔湯", subcat: "soup-stew", ingredients: "排骨 3塊, 白蘿蔔 100g, 薑片 2片, 枸杞 少許", tip: "蘿蔔去皮必須刨深一點去除苦味。排骨一定先冷水川燙去血水，湯頭煮出來最清澈。", ytQuery: "蘿蔔排骨湯 做法 詹姆士" },
+            { id: 66, name: "溫潤山藥香菇雞湯", subcat: "soup-stew", ingredients: "山藥 80g, 雞腿切塊 3塊, 鮮香菇 2朵, 薑片 1片", tip: "山藥去皮要防過敏戴手套。山藥等雞湯快熬好前 8 分鐘再放入，以免燉太爛散架。", ytQuery: "山藥雞湯 做法" },
+            { id: 67, name: "經典柴魚昆布湯", subcat: "soup-stew", ingredients: "昆布 5g, 柴魚片 10g, 水 500ml", tip: "昆布泡冷水一整夜，小火滾起前將昆布撈出。熄火倒入柴魚片，浸泡 2 分鐘後過篩。", ytQuery: "日式高湯 昆布 做法 MASA" },
+            { id: 68, name: "鮮綠高麗菜蛋花湯", subcat: "soup-stew", ingredients: "高麗菜葉 40g, 雞蛋 1顆, 柴魚高湯 250ml", tip: "高麗菜撕小塊。用熱高湯煮 3 分鐘至軟透，最後倒入蛋液關火，清甜好消化。", ytQuery: "蛋花湯 做法 詹姆士" },
+            { id: 69, name: "開胃扁魚白菜滷", subcat: "soup-stew", ingredients: "大白菜 150g, 熟蛋酥 10g, 香菇絲 少許, 醬油 1小匙", tip: "大白菜用手撕成小塊（比刀切更容易入味），與香菇慢慢用弱火燉 15 分鐘至完全軟爛。", ytQuery: "白菜滷 做法 簡單" },
+            { id: 70, name: "芋頭燉排骨煲", subcat: "soup-stew", ingredients: "芋頭 80g, 排骨 3塊, 醬油 1大匙", tip: "芋頭切塊先用氣炸鍋 180 度烤 5 分鐘使其外皮定型，再與排骨燉煮，湯汁濃而不糊。", ytQuery: "芋頭排骨 做法" },
+            { id: 71, name: "元氣蔬菜海鮮大補湯", subcat: "soup-stew", ingredients: "洋蔥 1/4顆, 番茄 1/2顆, 蛤蜊 4顆, 鯛魚片 30g, 鮮奶 50ml", tip: "洋蔥番茄和少許高湯熬出精華，關火前倒入海鮮與少許牛奶，湯頭滑順帶甜感。", ytQuery: "海鮮蔬菜湯 做法" },
+            { id: 72, name: "甘甜四神湯-兒童版", subcat: "soup-stew", ingredients: "淮山 10g, 蓮子 10g, 芡實 10g, 豬小排 3塊", tip: "不放傳統當歸酒。只用茯苓淮山蓮子與排骨清燉，湯底乳白溫和，健脾胃聖品！", ytQuery: "四神湯 寶寶 做法" },
+            { id: 73, name: "八寶冬粉羹湯", subcat: "soup-stew", ingredients: "冬粉 1/2把, 胡蘿蔔絲 15g, 香菇末 10g, 蛋花 1顆分", tip: "冬粉泡軟剪成細短段。用高湯熬蘿蔔香菇，最後加入冬粉滾熟勾薄芡，口感好吞。", ytQuery: "冬粉湯 簡單做法" },
+            { id: 74, name: "開胃酸辣湯-不辣版", subcat: "soup-stew", ingredients: "胡蘿蔔絲/豆腐絲/木耳絲 各適量, 蛋花 1顆, 烏醋 1小匙", tip: "不放胡椒與辣椒。全靠香菇與豬肉絲熬湯，起鍋淋一圈烏醋與香油，酸香促食慾。", ytQuery: "酸辣湯 做法 詹姆士" },
+            { id: 75, name: "甜心蓮子銀耳湯", subcat: "soup-stew", ingredients: "乾白木耳 15g, 蓮子 10g, 冰糖 少許, 枸杞 3粒", tip: "白木耳用麗克特打碎成細絲。電鍋燉 2 遍就能釋放出極豐富的膠質，黏潤清甜。", ytQuery: "銀耳蓮子湯 做法" },
+            { id: 76, name: "麻油猴頭菇湯-溫和版", subcat: "soup-stew", ingredients: "猴頭菇 50g, 嫩薑片 1片, 枸杞 少許, 麻油 1/2小匙", tip: "猴頭菇徹底洗淨手撕小塊。極少麻油和薑片小火炒香，加高湯燉透，溫補不燥熱。", ytQuery: "猴頭菇湯 做法" },
+            { id: 77, name: "電鍋香甜南瓜湯", subcat: "soup-stew", ingredients: "南瓜 120g, 水 150ml, 鮮奶 50ml", tip: "南瓜切大塊電鍋蒸軟，取出直接在鍋裡用湯匙壓泥，拌入熱鮮奶攪勻，香醇綿細。", ytQuery: "南瓜濃湯 電鍋" },
+            { id: 78, name: "金針菇番茄蛋花湯", subcat: "soup-stew", ingredients: "番茄 1/2顆, 金針菇(切小段) 20g, 雞蛋 1顆", tip: "金針菇纖維極韌。切成 1 公分短段再入湯煮，避免孩子嚼不爛挑食吐掉。", ytQuery: "番茄金針菇湯 做法" },
+            { id: 79, name: "暖胃山藥排骨湯", subcat: "soup-stew", ingredients: "排骨 3塊, 日本山藥 80g, 枸杞 少許", tip: "日本山藥生吃熟食皆可，所以入鍋滾煮不要超過 5 分鐘，保留微爽脆與甘糯感。", ytQuery: "山藥排骨湯 做法" },
+            { id: 80, name: "冬瓜排骨酥湯", subcat: "soup-stew", ingredients: "冬瓜 100g, 排骨酥 4塊, 高湯 300ml", tip: "使用無骨排骨酥與冬瓜同入小碗電鍋蒸煮，冬瓜入口即化，排骨酥肉香滿溢。", ytQuery: "冬瓜排骨湯 做法" },
+
+            // Phase 5: 孩子最愛點心與副食品 (81-100)
+            { id: 81, name: "藍莓優格果昔", subcat: "snack-puree", ingredients: "冷凍藍莓 50g, 無糖優格 80g, 鮮奶 50ml, 香蕉 1/2根", tip: "香蕉自帶果糖可代替白砂。用麗克特調理機四刃刀頭點按高速打10秒即成慕斯口感！", ytQuery: "藍莓優格果昔 做法" },
+            { id: 82, name: "蘋果雞蛋黃細泥", subcat: "snack-puree", ingredients: "鮮蘋果丁 50g, 水煮蛋黃 1個, 溫開水 20ml", tip: "蘋果蒸軟能去酸提甜，配合蛋黃用麗克特高速磨碎，打成金黃香滑的吐司抹醬。", ytQuery: "蘋果泥 寶寶副食 做法" },
+            { id: 0, name: "香蕉燕麥煎餅", subcat: "snack-puree", ingredients: "香蕉 1根, 即食燕麥 30g, 雞蛋 1顆", tip: "香蕉壓泥，和燕麥、蛋液拌勻。平底鍋抹極少植物油，小火煎到雙面金黃，天然香甜！", ytQuery: "香蕉燕麥餅 做法" },
+            { id: 84, name: "黃金香脆烤地瓜條", subcat: "snack-puree", ingredients: "台農57號地瓜 1根, 橄欖油 1/2小匙", tip: "地瓜切約1公分粗長條，泡水 10 分鐘洗掉表面澱粉，抹油後氣炸鍋 180 度烤 15 分鐘最脆甜。", ytQuery: "氣炸地瓜條 做法" },
+            { id: 85, name: "手作日式牛奶布丁", subcat: "snack-puree", ingredients: "全脂鮮乳 150ml, 雞蛋 1顆, 砂糖 10g", tip: "鮮乳溫熱加糖融化，混入蛋液充分過篩 2 次。倒入容器蓋上錫箔紙，電鍋蒸 10 分鐘，軟滑如絲！", ytQuery: "電鍋布丁 做法 簡單" },
+            { id: 86, name: "濃香手作黑芝麻糊", subcat: "snack-puree", ingredients: "熟黑芝麻粉 30g, 白飯 1大匙, 熱開水 150ml, 糖 少許", tip: "白飯是芝麻糊濃稠的天然來源。將芝麻粉、白飯和熱水用麗克特磨細15秒即成香濃芝麻糊。", ytQuery: "黑芝麻糊 做法 簡單" },
+            { id: 87, name: "香滑高鈣南瓜泥", subcat: "snack-puree", ingredients: "熟南瓜 100g, 鮮乳 20ml, 寶寶起司 1/2片", tip: "熟南瓜加鮮乳打勻，放入起司片微波 30 秒至起司溶化拌勻，是高鈣下午茶首選！", ytQuery: "南瓜泥 寶寶副食 做法" },
+            { id: 88, name: "黃金酪梨牛奶果昔", subcat: "snack-puree", ingredients: "熟酪梨 1/4顆, 布丁 1/2盒, 鮮乳 150ml", tip: "孩子怕酪梨草味？加入半盒布丁與牛奶一同用麗克特打10秒，甜滋滋毫無澀感！", ytQuery: "酪梨牛奶 比例 做法" },
+            { id: 89, name: "紅豆紫米甜心粥", subcat: "snack-puree", ingredients: "紅豆 30g, 紫米 20g, 黑糖 少許", tip: "紅豆紫米浸泡一整晚。放入電鍋加兩碗水，外鍋蒸 2 次，跳起放黑糖，溫潤補血。", ytQuery: "紅豆紫米粥 做法" },
+            { id: 90, name: "港式雙皮奶", subcat: "snack-puree", ingredients: "鮮乳 150ml, 蛋白 1顆分, 砂糖 10g", tip: "鮮奶加熱融化砂糖，放涼後與蛋白液攪勻過篩。入電鍋外鍋半杯水蒸熟，表面有甜甜奶皮。", ytQuery: "雙皮奶 簡單做法" },
+            { id: 91, name: "香Q草莓大福-簡易版", subcat: "snack-puree", ingredients: "草莓 2顆, 紅豆沙 40g, 吐司 2片", tip: "免揉麻糬皮！將吐司切邊用擀麵棍壓薄，包紅豆沙與草莓整形成圓球，切開極夢幻！", ytQuery: "簡易草莓大福 做法" },
+            { id: 92, name: "綠豆沙牛奶果昔", subcat: "snack-puree", ingredients: "熟綠豆 50g, 鮮乳 120ml, 冰塊/糖 各少許", tip: "熟綠豆跟冰塊牛奶放麗克特，高速點打 10 秒，化身無渣香甜的綠豆沙牛奶。", ytQuery: "綠豆沙牛奶 做法" },
+            { id: 93, name: "法式烤麵包布丁", subcat: "snack-puree", ingredients: "吐司 1片, 雞蛋 1顆, 鮮乳 100ml, 葡萄乾 少許", tip: "吐司切丁浸泡在蛋奶液中 5 分鐘。撒上葡萄乾入氣炸鍋 160 度烘烤 10 分鐘即成外脆內軟。", ytQuery: "烤麵包布丁 做法" },
+            { id: 94, name: "手作鮮奶雞蛋糕", subcat: "snack-puree", ingredients: "低筋麵粉 50g, 雞蛋 1顆, 鮮奶 30ml, 砂糖 10g", tip: "全蛋打發至提起畫寫八字不易消失。篩入低粉與牛奶拌勻，倒入鬆餅機或烤模烤 5 分鐘。", ytQuery: "電烤盤雞蛋糕 做法" },
+            { id: 95, name: "香軟黑糖糖炒栗子", subcat: "snack-puree", ingredients: "熟栗子 10顆, 黑糖 1小匙, 水 50ml", tip: "熟栗子加黑糖水入平底鍋慢火滾煮，直到糖水收乾焦糖化裹在栗子上，沙潤香甜。", ytQuery: "糖炒栗子 簡單做法" },
+            { id: 96, name: "芒果西米露", subcat: "snack-puree", ingredients: "西米 20g, 鮮芒果 1/2顆, 椰奶 30ml, 鮮乳 50ml", tip: "西米大火滾 10 分鐘，關火悶 15 分鐘至完全透明撈出泡冰水。拌入芒果椰奶極爽口！", ytQuery: "芒果西米露 做法 簡單" },
+            { id: 97, name: "簡易麵包蘋果派", subcat: "snack-puree", ingredients: "蘋果 1/4顆, 吐司 2片, 蛋黃液 1顆分, 砂糖 少許", tip: "蘋果切小丁加糖炒軟成蘋果醬。吐司壓平包蘋果丁摺起，表面刷蛋黃液氣炸 180 度烤 6 分鐘。", ytQuery: "簡易蘋果派 做法" },
+            { id: 98, name: "浪漫紫薯山藥細泥", subcat: "snack-puree", ingredients: "紫甘薯 50g, 山藥 50g, 配方奶/溫水 20ml", tip: "紫甘薯與山藥蒸軟。用麗克特四刃刀頭加配方奶打 12 秒，打成天然夢幻紫粉色好消化細泥。", ytQuery: "紫薯山藥泥 做法" },
+            { id: 99, name: "無油健康爆米花", subcat: "snack-puree", ingredients: "乾燥爆裂玉米粒 30g", tip: "乾玉米粒直接放入大深玻璃碗中，蓋上微波爐專用蓋，大火微波 2.5 分鐘，無油香脆！", ytQuery: "微波爐爆米花 做法" },
+            { id: 100, name: "手作鮮奶油奶酪", subcat: "snack-puree", ingredients: "鮮乳 100ml, 鮮奶油 50ml, 吉利丁片 1.5片, 糖 10g", tip: "吉利丁片泡冰水。溫熱牛奶鮮奶油融化砂糖，加入擠乾的吉利丁，過篩倒容器冷藏 4 小時以上。", ytQuery: "奶酪 簡單做法" }
+        ];
+
+        // ==========================================
+        //         資料核心邏輯 (LocalStorage)
+        // ==========================================
+        let recipes = [];
+        let currentSubcatFilter = 'all';
+
+        // 系統啟動初始化
+        window.onload = function() {
+            loadRecipes();
+            initRatingStars();
+            switchTab('tracker');
+            
+            // 自動載入預設 API 金鑰（如有）
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) {
+                document.getElementById('gemini-api-key').value = savedKey;
+            }
+        };
+
+        // 載入資料
+        function loadRecipes() {
+            const raw = localStorage.getItem('growth_recipes');
+            if (raw) {
+                recipes = JSON.parse(raw);
+            } else {
+                // 第一次進入：預載「咖哩烏龍麵」作為起點
+                recipes = [{
+                    id: 'default-curry',
+                    name: "咖哩烏龍麵",
+                    category: "主食一鍋搞定",
+                    date: new Date().toISOString().split('T')[0],
+                    rating: 5,
+                    difficulty: 1,
+                    ingredients: "烏龍麵 1包, 咖哩塊 1塊, 洋蔥 1/4顆, 豬肉片 50g",
+                    notes: "這是我新廚房開火的第一道菜！洋蔥照指南裡寫的切成細碎，完全沒有被孩子發現。整盤吃光光！下一次湯汁水放少 20ml 口感會更濃稠好玩。"
+                }];
+                localStorage.setItem('growth_recipes', JSON.stringify(recipes));
+            }
+            renderAll();
+        }
+
+        // 儲存資料
+        function saveRecipesToLocal() {
+            localStorage.setItem('growth_recipes', JSON.stringify(recipes));
+            renderAll();
+        }
+
+        // 重新渲染全部
+        function renderAll() {
+            renderHistoryList();
+            renderStats();
+            render100Recipes();
+        }
+
+        // ==========================================
+        //         TAB 1: 菜單紀錄與歷史邏輯
+        // ==========================================
+        
+        // 互動式星星打分
+        function initRatingStars() {
+            setRating(5);
+        }
+
+        function setRating(val) {
+            document.getElementById('recipe-rating').value = val;
+            const stars = document.querySelectorAll('.rating-star');
+            stars.forEach((star, index) => {
+                if (index < val) {
+                    star.classList.remove('fa-regular', 'text-slate-300');
+                    star.classList.add('fa-solid', 'text-amber-400');
+                } else {
+                    star.classList.remove('fa-solid', 'text-amber-400');
+                    star.classList.add('fa-regular', 'text-slate-300');
+                }
+            });
+
+            const textArr = ["", "(1星挑食吐掉)", "(2星勉強吃幾口)", "(3星平常水準)", "(4星表現良好)", "(5星超愛空盤)"];
+            document.getElementById('rating-text').innerText = textArr[val];
+        }
+
+        // 儲存做菜紀錄表單
+        function saveRecipe(event) {
+            event.preventDefault();
+
+            const rId = document.getElementById('recipe-id').value;
+            const rName = document.getElementById('recipe-name').value.trim();
+            const rCategory = document.getElementById('recipe-category').value;
+            const rDate = document.getElementById('recipe-date').value;
+            const rRating = parseInt(document.getElementById('recipe-rating').value);
+            const rDifficulty = parseInt(document.getElementById('recipe-difficulty').value);
+            const rIngredients = document.getElementById('recipe-ingredients').value.trim();
+            const rNotes = document.getElementById('recipe-notes').value.trim();
+
+            if (!rName || !rDate) return;
+
+            if (rId) {
+                // 編輯
+                const idx = recipes.findIndex(r => r.id === rId);
+                if (idx !== -1) {
+                    recipes[idx] = { id: rId, name: rName, category: rCategory, date: rDate, rating: rRating, difficulty: rDifficulty, ingredients: rIngredients, notes: rNotes };
+                    showToast("料理日誌更新成功！", "success");
+                }
+            } else {
+                // 新增
+                const newId = 'r-' + Date.now();
+                recipes.unshift({ id: newId, name: rName, category: rCategory, date: rDate, rating: rRating, difficulty: rDifficulty, ingredients: rIngredients, notes: rNotes });
+                showToast(`新增做菜日誌「${rName}」！已記錄在您的歷程中。`, "success");
+            }
+
+            saveRecipesToLocal();
+            resetForm();
+        }
+
+        // 重置表單
+        function resetForm() {
+            document.getElementById('recipe-id').value = '';
+            document.getElementById('recipe-name').value = '';
+            document.getElementById('recipe-category').selectedIndex = 0;
+            document.getElementById('recipe-date').value = '';
+            setRating(5);
+            document.getElementById('recipe-difficulty').selectedIndex = 0;
+            document.getElementById('recipe-ingredients').value = '';
+            document.getElementById('recipe-notes').value = '';
+        }
+
+        // 刪除確認 Modal
+        let pendingDeleteId = null;
+        function deleteRecipe(id) {
+            pendingDeleteId = id;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            pendingDeleteId = null;
+        }
+
+        document.getElementById('btn-confirm-delete').onclick = function() {
+            if (pendingDeleteId) {
+                recipes = recipes.filter(r => r.id !== pendingDeleteId);
+                saveRecipesToLocal();
+                showToast("做菜日誌已刪除！", "info");
+                closeDeleteModal();
+            }
+        };
+
+        // 編輯料理日誌
+        function editRecipe(id) {
+            const recipe = recipes.find(r => r.id === id);
+            if (!recipe) return;
+
+            document.getElementById('recipe-id').value = recipe.id;
+            document.getElementById('recipe-name').value = recipe.name;
+            document.getElementById('recipe-category').value = recipe.category;
+            document.getElementById('recipe-date').value = recipe.date;
+            setRating(recipe.rating);
+            document.getElementById('recipe-difficulty').value = recipe.difficulty;
+            document.getElementById('recipe-ingredients').value = recipe.ingredients || '';
+            document.getElementById('recipe-notes').value = recipe.notes || '';
+
+            // 滑動到表單並聚焦
+            document.getElementById('recipe-name').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('recipe-name').focus();
+        }
+
+        // 渲染歷史日誌
+        function renderHistoryList() {
+            const container = document.getElementById('history-container');
+            container.innerHTML = '';
+
+            const searchText = document.getElementById('search-log').value.trim().toLowerCase();
+
+            let filtered = recipes;
+            if (searchText) {
+                filtered = recipes.filter(r => 
+                    r.name.toLowerCase().includes(searchText) || 
+                    (r.ingredients && r.ingredients.toLowerCase().includes(searchText)) ||
+                    (r.notes && r.notes.toLowerCase().includes(searchText))
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-folder-open text-2xl mb-1.5 block"></i>
+                        沒有找到任何烹飪紀錄
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(r => {
+                // 產生星星圖形
+                let starHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    starHtml += `<i class="fa-solid fa-star text-xs ${i <= r.rating ? 'text-amber-400' : 'text-slate-200'}"></i>`;
+                }
+
+                // 產生難度標籤
+                const diffLabels = ["", "⭐ 簡單", "⭐⭐ 中等", "⭐⭐⭐ 繁複"];
+                const diffText = diffLabels[r.difficulty] || "⭐ 簡單";
+
+                const isChallenge = top100Recipes.some(cr => cr.name.trim().toLowerCase() === r.name.trim().toLowerCase());
+                const badgeHtml = isChallenge ? `<span class="bg-amber-100 text-amber-800 text-[9px] px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-trophy text-[9px] mr-0.5"></i>挑戰成功</span>` : '';
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-orange-300 transition-all flex flex-col sm:flex-row justify-between gap-3 text-xs";
+                card.innerHTML = `
+                    <div class="space-y-1.5 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded text-[9px]">${r.category}</span>
+                            <h4 class="font-bold text-slate-800 text-sm">${r.name}</h4>
+                            ${badgeHtml}
+                        </div>
+                        <div class="flex items-center gap-4 text-slate-400 text-[10px]">
+                            <span>📅 ${r.date}</span>
+                            <span class="flex items-center gap-0.5">評分: ${starHtml}</span>
+                            <span>難度: ${diffText}</span>
+                        </div>
+                        ${r.ingredients ? `<p class="text-slate-500 text-[11px] leading-relaxed"><strong class="text-slate-600">🥒 備料食材：</strong>${r.ingredients}</p>` : ''}
+                        ${r.notes ? `<p class="bg-white p-2 rounded-lg border border-slate-200/50 text-slate-600 text-[11px] leading-relaxed"><strong class="text-slate-700">💡 做菜日記：</strong>${r.notes}</p>` : ''}
+                    </div>
+                    <div class="flex sm:flex-col justify-end items-end gap-2.5 border-t sm:border-t-0 border-slate-200 pt-2 sm:pt-0">
+                        <button onclick="editRecipe('${r.id}')" class="text-orange-600 hover:text-orange-700 font-bold flex items-center gap-1 text-[11px]">
+                            <i class="fa-solid fa-pen-to-square"></i> 編輯
+                        </button>
+                        <button onclick="deleteRecipe('${r.id}')" class="text-rose-500 hover:text-rose-600 font-bold flex items-center gap-1 text-[11px]">
+                            <i class="fa-solid fa-trash-can"></i> 刪除
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 渲染統計面板
+        function renderStats() {
+            const total = recipes.length;
+            document.getElementById('stat-total-cooked').innerText = `${total} 道`;
+
+            if (total === 0) {
+                document.getElementById('stat-avg-rating').innerText = `0.0 ★`;
+                document.getElementById('stat-picky-rate').innerText = `0%`;
+                document.getElementById('stat-fav-category').innerText = `無資料`;
+                return;
+            }
+
+            // 平均星
+            const sumStars = recipes.reduce((acc, r) => acc + r.rating, 0);
+            const avg = (sumStars / total).toFixed(1);
+            document.getElementById('stat-avg-rating').innerText = `${avg} ★`;
+
+            // 挑食率 (1星與2星視為挑食)
+            const pickyCount = recipes.filter(r => r.rating <= 2).length;
+            const pickyRate = Math.round((pickyCount / total) * 100);
+            document.getElementById('stat-picky-rate').innerText = `${pickyRate}%`;
+
+            // 最常做類別
+            const catCounts = {};
+            recipes.forEach(r => {
+                catCounts[r.category] = (catCounts[r.category] || 0) + 1;
+            });
+            let maxCat = "無資料";
+            let maxCount = 0;
+            for (const cat in catCounts) {
+                if (catCounts[cat] > maxCount) {
+                    maxCount = catCounts[cat];
+                    maxCat = cat;
+                }
+            }
+            document.getElementById('stat-fav-category').innerText = maxCat;
+        }
+
+        // ==========================================
+        //         TAB 2: 經典 100 道家常菜邏輯
+        // ==========================================
+        
+        // 算出總共有多少道 100 大料理已被解鎖
+        function countUnlocked100() {
+            let count = 0;
+            top100Recipes.forEach(r => {
+                const isUnlocked = recipes.some(ur => ur.name.trim().toLowerCase() === r.name.trim().toLowerCase());
+                if (isUnlocked) count++;
+            });
+            return count;
+        }
+
         // 渲染 100 道料理卡片
         function render100Recipes() {
             const grid = document.getElementById('recipes-100-grid');
@@ -147,7 +1169,7 @@
             // 1. 計算總解鎖數與成就稱號
             const unlockedCount = countUnlocked100();
             document.getElementById('achieve-count-text').innerText = `${unlockedCount} / 100`;
-            const pct = unlockedCount;
+            const pct = unlockedCount; // 剛好對應 100 題
             document.getElementById('achieve-progress-bar').style.width = `${pct}%`;
 
             // 設定廚藝稱號
@@ -185,52 +1207,107 @@
             });
 
             if (filtered.length === 0) {
-<!-- ... existing code ... -->
-        // 呼叫 Gemini 3 Flash API 主函數（支援自動 API key 注入，Canvas 自動在 runtime 接管）
-        async function fetchGemini(promptText, systemInstructionText = "", structuredSchema = null) {
-            const userKey = document.getElementById('gemini-api-key').value.trim();
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-slate-200 text-slate-400 text-xs">
+                        <i class="fa-solid fa-magnifying-glass text-2xl mb-1.5 block"></i>
+                        符合條件的經典挑戰料理為空，換個篩選或關鍵字試試看吧！
+                    </div>
+                `;
+                return;
+            }
+
+            // 3. 輸出卡片
+            filtered.forEach(r => {
+                const isUnlocked = recipes.some(ur => ur.name.trim().toLowerCase() === r.name.trim().toLowerCase());
+                const safeName = r.name.replace(/'/g, "\\'");
+                const safeIngredients = r.ingredients.replace(/'/g, "\\'");
+                const safeTip = r.tip.replace(/'/g, "\\'");
+
+                const card = document.createElement('div');
+                card.className = `bg-white p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 text-xs ${
+                    isUnlocked ? 'border-amber-300 shadow-md bg-gradient-to-br from-amber-50/10 to-orange-50/30' : 'border-slate-200 shadow-xs'
+                }`;
+
+                const badgeHtml = isUnlocked 
+                    ? `<span class="bg-amber-400 text-slate-900 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs"><i class="fa-solid fa-circle-check"></i>已解鎖</span>`
+                    : `<span class="bg-slate-100 text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1"><i class="fa-solid fa-lock"></i>待挑戰</span>`;
+
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start gap-2">
+                            <h4 class="font-black text-slate-800 text-sm flex items-center gap-1.5">
+                                <span class="text-orange-500 font-bold">${r.id || ''}.</span> ${r.name}
+                            </h4>
+                            ${badgeHtml}
+                        </div>
+                        <p class="text-slate-500 text-[11px] leading-relaxed"><strong class="text-slate-600">🍉 核心食材：</strong>${r.ingredients}</p>
+                        <p class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/50 text-slate-600 text-[11px] leading-relaxed">
+                            <strong class="text-orange-600 font-bold"><i class="fa-solid fa-circle-play"></i> 避坑指南：</strong>${r.tip}
+                        </p>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2.5 border-t border-slate-100 gap-2 flex-wrap">
+                        <button onclick="openResource('https://www.youtube.com/results?search_query=${encodeURIComponent(r.ytQuery)}', '${r.name}')" class="text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1.5 transition-all text-[11px]">
+                            <i class="fa-brands fa-youtube text-base animate-pulse"></i> 📺 影音教學
+                        </button>
+                        
+                        ${isUnlocked ? `
+                            <span class="text-amber-500 text-[10px] font-black flex items-center gap-0.5"><i class="fa-solid fa-trophy"></i> 榮譽亮起</span>
+                        ` : `
+                            <button onclick="quickImportChallenge('${safeName}', '${safeIngredients}', '${safeTip}')" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-1.5 px-3.5 rounded-xl shadow-xs transition-all flex items-center gap-1 text-[11px]">
+                                👉 快速挑戰
+                            </button>
+                        `}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 子類別篩選器切換
+        function filterSubcat(subcat) {
+            currentSubcatFilter = subcat;
+            document.querySelectorAll('.subcat-pill').forEach(btn => {
+                btn.className = "subcat-pill px-3 py-1.5 rounded-full font-bold transition-all text-slate-600 bg-slate-100 hover:bg-slate-200";
+            });
+            document.getElementById(`pill-subcat-${subcat}`).className = "subcat-pill px-3 py-1.5 rounded-full font-bold transition-all bg-slate-800 text-white";
+            render100Recipes();
+        }
+
+        // 一鍵自動匯入菜單填寫表單
+        function quickImportChallenge(name, ingredients, notes) {
+            switchTab('tracker');
+
+            document.getElementById('recipe-id').value = '';
+            document.getElementById('recipe-name').value = name;
             
-            // 💡 智慧型環境偵測：如果使用者在 GitHub Pages (非 Canvas 本地或託管環境) 且完全沒輸入 API Key
-            const isGitHubPages = window.location.hostname !== 'localhost' && 
-                                  !window.location.hostname.includes('webcontainer') && 
-                                  !window.location.hostname.includes('internal-preview') &&
-                                  !window.location.hostname.includes('127.0.0.1');
-                                  
-            if (!userKey && isGitHubPages) {
-                showToast("💡 偵測到您目前在 GitHub 運作！請先在「AI 智慧助手」設定您個人的 Gemini API Key，才能啟用 AI 智慧功能喔！", "error");
-                switchTab('ai-assistant');
-                setTimeout(() => {
-                    document.getElementById('gemini-api-key').scrollIntoView({ behavior: 'smooth' });
-                    document.getElementById('gemini-api-key').focus();
-                }, 400);
-                throw new Error("Missing API Key on GitHub Pages production environment.");
-            }
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userKey}`;
-
-            const payload = {
-                contents: [{ parts: [{ text: promptText }] }]
-            };
-
-            if (systemInstructionText) {
-                payload.systemInstruction = {
-                    parts: [{ text: systemInstructionText }]
+            // 判斷分類
+            const orig = top100Recipes.find(r => r.name === name);
+            if (orig) {
+                const subToCat = {
+                    'one-pot': '主食一鍋搞定',
+                    'egg-tofu': '營養蛋與豆腐',
+                    'meat-seafood': '下飯肉類海鮮',
+                    'soup-stew': '溫暖湯品燉菜',
+                    'snack-puree': '點心與副食品'
                 };
+                document.getElementById('recipe-category').value = subToCat[orig.subcat] || '主食一鍋搞定';
             }
 
-            // 如果有定義 JSON Schema，則開啟結構化 JSON 輸出
-            if (structuredSchema) {
-                payload.generationConfig = {
-                    responseMimeType: "application/json",
-                    responseSchema: structuredSchema
-                };
-            }
+            document.getElementById('recipe-difficulty').value = orig ? (orig.subcat === 'one-pot' ? 1 : 2) : 1;
+            document.getElementById('recipe-ingredients').value = ingredients;
+            document.getElementById('recipe-notes').value = `【挑戰 100 大家常菜】\\n防失敗避坑關鍵：${notes}\\n\\n今日實作心得：`;
 
-            let retries = 3;
-            let backoffMs = 1000;
+            document.getElementById('recipe-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('recipe-rating').focus();
+            
+            showToast(`已自動為您匯入「${name}」挑戰表單！煮完填上今天日期並給小孩評分即可解鎖金盃。`, 'success');
+        }
 
-            while (retries > 0) {
-<!-- ... existing code ... -->
+        // ==========================================
+        //         TAB 3: 學習與備料指南 / 麗克特
+        // ==========================================
+        
         // 麗克特調理機專區：切換食譜頁籤
         function switchRecolteRecipe(recipeId) {
             document.querySelectorAll('.recolte-recipe-content').forEach(el => {
@@ -381,4 +1458,431 @@
         // ==========================================
         //         GEMINI AI INTEGRATION LOGIC
         // ==========================================
-<!-- ... existing code ... -->
+        
+        // 呼叫 Gemini 3.1 Flash API 主函數（支援自動 API key 注入，Canvas 自動在 runtime 接管）
+        async function fetchGemini(promptText, systemInstructionText = "", structuredSchema = null) {
+            const userKey = document.getElementById('gemini-api-key').value.trim();
+            
+            // 💡 智慧型環境偵測：如果使用者在 GitHub Pages (非 Canvas 本地或託管環境) 且完全沒輸入 API Key
+            const isGitHubPages = window.location.hostname !== 'localhost' && 
+                                  !window.location.hostname.includes('webcontainer') && 
+                                  !window.location.hostname.includes('internal-preview') &&
+                                  !window.location.hostname.includes('127.0.0.1');
+                                  
+            if (!userKey && isGitHubPages) {
+                showToast("💡 偵測到您目前在 GitHub 運作！請先在「AI 智慧助手」設定您個人的 Gemini API Key，才能啟用 AI 智慧功能喔！", "error");
+                switchTab('ai-assistant');
+                setTimeout(() => {
+                    document.getElementById('gemini-api-key').scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('gemini-api-key').focus();
+                }, 400);
+                throw new Error("Missing API Key on GitHub Pages production environment.");
+            }
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash:generateContent?key=${userKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: promptText }] }]
+            };
+
+            if (systemInstructionText) {
+                payload.systemInstruction = {
+                    parts: [{ text: systemInstructionText }]
+                };
+            }
+
+            // 如果有定義 JSON Schema，則開啟結構化 JSON 輸出
+            if (structuredSchema) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: structuredSchema
+                };
+            }
+
+            let retries = 3;
+            let backoffMs = 1000;
+
+            while (retries > 0) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error ? errorData.error.message : `HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    if (!data.candidates || data.candidates.length === 0) {
+                        throw new Error("API returned an empty response candidate.");
+                    }
+
+                    return data.candidates[0].content.parts[0].text;
+                } catch (error) {
+                    retries--;
+                    if (retries === 0) {
+                        showToast(`Gemini 呼叫失敗：${error.message}`, "error");
+                        throw error;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, backoffMs));
+                    backoffMs *= 2; // 指數退避
+                }
+            }
+        }
+
+        // 🔮 AI 核心 1: 冰箱剩食變身魔法
+        async function runFridgeMagic() {
+            const userIngredients = document.getElementById('ai-fridge-ingredients').value.trim();
+            const childProfile = document.getElementById('ai-fridge-child-profile').value;
+
+            if (!userIngredients) {
+                showToast("請先輸入您手邊有哪些要打發的剩食食材！", "error");
+                return;
+            }
+
+            const placeholder = document.getElementById('fridge-result-placeholder');
+            const loading = document.getElementById('fridge-result-loading');
+            const display = document.getElementById('fridge-result-display');
+
+            placeholder.classList.add('hidden');
+            display.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            const sysPrompt = "你是一位專精於『嬰幼兒副食品與少油鹽兒童餐』的愛心主廚。你特別會利用有限、零星的剩食，結合營養學配比，設計出外觀好看、沒有怪味且絕對好吞嚥的孩子健康家常料理。";
+            
+            const userPrompt = `冰箱剩食食材：『${userIngredients}』
+            設定目標對象：『${childProfile}』
+            
+            請為我開發出一道能讓這個年齡段的孩子大口吃完的剩食翻轉食譜。
+            請完全以符合規定的 JSON 格式輸出回傳。`;
+
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    dishName: { type: "STRING", description: "適合小兒聽、香甜好玩的菜色名稱" },
+                    prepTime: { type: "STRING", description: "預估總備料與烹飪時間，例如『15 分鐘』" },
+                    nutriValue: { type: "STRING", description: "這道料理專為孩子設計的營養出彩之處" },
+                    recipeIngredients: { type: "ARRAY", items: { type: "STRING" }, description: "食材清單（含精細比例）" },
+                    prepSteps: { type: "ARRAY", items: { type: "STRING" }, description: "針對零廚藝新手，極其通俗直覺的烹飪與隱形切碎步驟" },
+                    parentTip: { type: "STRING", description: "防止孩子挑食或大口吞嚥的關鍵提醒（例如：不要加醬油改用玉米甜等）" }
+                },
+                required: ["dishName", "prepTime", "nutriValue", "recipeIngredients", "prepSteps", "parentTip"]
+            };
+
+            try {
+                const jsonText = await fetchGemini(userPrompt, sysPrompt, schema);
+                const data = JSON.parse(jsonText);
+
+                renderFridgeResult(data);
+                showToast("🔮 冰箱翻轉魔法施展成功！金黃營養菜單已生成！", "success");
+            } catch (err) {
+                console.error("Fridge Magic Error:", err);
+                placeholder.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        // 渲染冰箱翻轉結果
+        function renderFridgeResult(data) {
+            const display = document.getElementById('fridge-result-display');
+            display.innerHTML = '';
+
+            const safeDishName = data.dishName.replace(/'/g, "\\'");
+            const safeIngredients = data.recipeIngredients.join(', ').replace(/'/g, "\\'");
+            const notesText = `【AI 冰箱剩食翻轉食譜：${safeDishName}】\\n⏱️ 製作時間：${data.prepTime}\\n\\n💡 營養點評：\\n${data.nutriValue}\\n\\n💡 避坑妙招：\\n${data.parentTip}`;
+
+            display.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex justify-between items-start gap-2 flex-wrap">
+                        <div>
+                            <h5 class="font-black text-indigo-900 text-sm flex items-center gap-1">
+                                <i class="fa-solid fa-hat-wizard text-indigo-500 animate-pulse"></i> ${data.dishName}
+                            </h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">⏱️ 預估時間：${data.prepTime}</p>
+                        </div>
+                        <button onclick="importRecolteToTracker('${safeDishName}', '主食一鍋搞定', '${safeIngredients}', '${notesText}')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-2.5 rounded-lg transition-all flex items-center gap-1 text-[10px] shadow-xs">
+                            <i class="fa-solid fa-file-import"></i> 匯入挑戰
+                        </button>
+                    </div>
+
+                    <p class="bg-indigo-50 p-2.5 rounded-xl border border-indigo-100 text-indigo-800 text-[10px] leading-relaxed">
+                        <strong>🍀 營養價值：</strong>${data.nutriValue}
+                    </p>
+
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+                        <strong class="text-slate-700 text-[11px] block"><i class="fa-solid fa-list-check"></i> 翻轉備料：</strong>
+                        <ul class="list-disc pl-4 space-y-0.5 text-slate-600 text-[10px]">
+                            ${data.recipeIngredients.map(i => `<li>${i}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+                        <strong class="text-slate-700 text-[11px] block"><i class="fa-solid fa-kitchen-set"></i> 傻瓜步驟：</strong>
+                        <ol class="list-decimal pl-4 space-y-1 text-slate-600 text-[10px]">
+                            ${data.prepSteps.map(s => `<li>${s}</li>`).join('')}
+                        </ol>
+                    </div>
+
+                    <p class="bg-amber-50 p-2.5 rounded-xl border border-amber-100 text-amber-900 text-[10px] leading-relaxed">
+                        <strong>💡 防挑食大絕：</strong>${data.parentTip}
+                    </p>
+                </div>
+            `;
+            display.classList.remove('hidden');
+        }
+
+        // 🔮 AI 核心 2: 挑食與煮焦救星教練
+        async function runSaviorCoach() {
+            const userProblem = document.getElementById('ai-fail-problem').value.trim();
+
+            if (!userProblem) {
+                showToast("請先輸入您昨天的挫折或孩子挑食的狀況！", "error");
+                return;
+            }
+
+            const placeholder = document.getElementById('savior-result-placeholder');
+            const loading = document.getElementById('savior-result-loading');
+            const display = document.getElementById('savior-result-display');
+
+            placeholder.classList.add('hidden');
+            display.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            const sysPrompt = "你是一位極其溫柔、幽默、對新手父母充滿愛心的金牌大廚兼幼兒心理營養師。你能從科學角度分析做菜失敗（如肉太柴、糊底、雞蛋蒸空）的原因，並提供對治幼兒挑食抗拒的高級廚藝改良指南。";
+            
+            const userPrompt = `遇到的烹飪挫折/挑食慘劇：『${userProblem}』
+            
+            請為我撰寫一份溫暖的診斷書：
+            1. 科學原因分析（為什麼會失敗或孩子會抗拒，如：火候、纖維或酸鹼度）。
+            2. 給新手的「黃金改良方案」（兩條具體可執行的做法）。
+            3. 給新手爸媽的溫柔心理打氣話。
+            請以 JSON 格式輸出，完全符合以下 Schema 規定。`;
+
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    analysis: { type: "STRING", description: "溫柔且科學的失敗原因分析" },
+                    solution1: { type: "STRING", description: "改良方案一 (具體到做法、比例、或火候控制)" },
+                    solution2: { type: "STRING", description: "改良方案二 (例如：如何隱形蔬菜或改變調味)" },
+                    comfortText: { type: "STRING", description: "一句暖心、鼓舞人心的主廚寄語" }
+                },
+                required: ["analysis", "solution1", "solution2", "comfortText"]
+            };
+
+            try {
+                const jsonText = await fetchGemini(userPrompt, sysPrompt, schema);
+                const data = JSON.parse(jsonText);
+
+                renderSaviorResult(data);
+                showToast("❤️ 溫柔教練診斷完畢！請收下逆襲指南！", "success");
+            } catch (err) {
+                console.error("Savior Coach Error:", err);
+                placeholder.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        // 渲染救星結果
+        function renderSaviorResult(data) {
+            const display = document.getElementById('savior-result-display');
+            display.innerHTML = '';
+
+            display.innerHTML = `
+                <div class="space-y-3.5 leading-relaxed">
+                    <div class="bg-rose-50 p-3 rounded-xl border border-rose-100 text-rose-800 text-[10px]">
+                        <strong>🔍 失敗癥結分析：</strong>
+                        <p class="mt-1">${data.analysis}</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
+                        <strong class="text-slate-800 text-[11px] block"><i class="fa-solid fa-wrench"></i> 下次逆襲兩大對策：</strong>
+                        <div class="space-y-1.5 text-[10px] text-slate-600">
+                            <p><strong>🎯 招式 1：</strong>${data.solution1}</p>
+                            <p><strong>🎯 招式 2：</strong>${data.solution2}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-3.5 rounded-xl text-center shadow-md">
+                        <i class="fa-solid fa-quote-left text-teal-300 text-base block mb-1"></i>
+                        <p class="text-[10px] font-bold italic leading-relaxed">${data.comfortText}</p>
+                    </div>
+                </div>
+            `;
+            display.classList.remove('hidden');
+        }
+
+        // API Key 儲存與清除
+        function saveApiKey() {
+            const val = document.getElementById('gemini-api-key').value.trim();
+            if (!val) {
+                showToast("請輸入有效的 Gemini API Key 才能儲存！", "error");
+                return;
+            }
+            localStorage.setItem('gemini_api_key', val);
+            showToast("Gemini API 金鑰儲存成功！已鎖定在此裝置瀏覽器中。", "success");
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem('gemini_api_key');
+            document.getElementById('gemini-api-key').value = '';
+            showToast("金鑰已成功從此瀏覽器安全移除！", "info");
+        }
+
+        // ==========================================
+        //         頁面輔助函數 (Tab / Modal / Toast)
+        // ==========================================
+        
+        // 切換頁籤
+        function switchTab(tabId) {
+            // 隱藏所有
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+
+            // 顯示當前
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`content-${tabId}`).classList.add('block');
+
+            // 調整導覽按鈕高亮 (桌面端)
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-800";
+            });
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            if (activeBtn) {
+                if (tabId === 'ai-assistant') {
+                    activeBtn.className = "tab-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-600 shadow-xs";
+                } else {
+                    activeBtn.className = "tab-btn px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-orange-600 shadow-xs";
+                }
+            }
+
+            // 調整導覽按鈕高亮 (手機端)
+            const mButtons = {
+                'tracker': 'btn-m-tracker',
+                'recipes-100': 'btn-m-recipes-100',
+                'guide': 'btn-m-guide',
+                'ai-assistant': 'btn-m-ai-assistant'
+            };
+            
+            for (const key in mButtons) {
+                const btn = document.getElementById(mButtons[key]);
+                if (btn) {
+                    btn.className = "flex flex-col items-center gap-0.5";
+                }
+            }
+            const activeMBtn = document.getElementById(mButtons[tabId]);
+            if (activeMBtn) {
+                if (tabId === 'ai-assistant') {
+                    activeMBtn.className = "flex flex-col items-center gap-0.5 text-indigo-600";
+                } else {
+                    activeMBtn.className = "flex flex-col items-center gap-0.5 text-orange-600";
+                }
+            }
+        }
+
+        // 客製化 Toast
+        let toastTimeout = null;
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msgEl = document.getElementById('toast-message');
+
+            msgEl.innerText = message;
+
+            // 根據類型指定外觀
+            if (type === 'success') {
+                toast.className = "fixed bottom-20 md:bottom-6 right-6 bg-emerald-800 text-white text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 z-50 transform translate-y-0 opacity-100 transition-all duration-300";
+                icon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-300 text-base"></i>`;
+            } else if (type === 'error') {
+                toast.className = "fixed bottom-20 md:bottom-6 right-6 bg-rose-800 text-white text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 z-50 transform translate-y-0 opacity-100 transition-all duration-300";
+                icon.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-300 text-base"></i>`;
+            } else {
+                toast.className = "fixed bottom-20 md:bottom-6 right-6 bg-slate-800 text-white text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 z-50 transform translate-y-0 opacity-100 transition-all duration-300";
+                icon.innerHTML = `<i class="fa-solid fa-circle-info text-orange-400 text-base"></i>`;
+            }
+
+            toast.classList.remove('hidden');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 4000);
+        }
+
+        // 開啟影音資源防阻擋機制
+        function openResource(url, title) {
+            const win = window.open(url, '_blank');
+            if (!win || win.closed || typeof win.closed == 'undefined') {
+                // 沙盒被阻擋了！彈出引導
+                showLinkModal(url, title);
+            } else {
+                showToast("已成功在新標籤頁開啟影片教學！", "success");
+            }
+        }
+
+        function showLinkModal(url, title) {
+            document.getElementById('modal-link-input').value = url;
+            document.getElementById('link-modal').classList.remove('hidden');
+        }
+
+        function closeLinkModal() {
+            document.getElementById('link-modal').classList.add('hidden');
+        }
+
+        function copyModalLink() {
+            const input = document.getElementById('modal-link-input');
+            input.select();
+            document.execCommand('copy');
+            showToast("網址已成功複製！請手動在瀏覽器中開啟觀看。", "success");
+            closeLinkModal();
+        }
+
+        // ==========================================
+        //         資料匯出與匯入功能 (JSON)
+        // ==========================================
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(recipes, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `廚房成長日誌備份_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("做菜數據備份成功！請妥善保存下載的 JSON 檔案。", "success");
+        }
+
+        function triggerImport() {
+            document.getElementById('import-file').click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        recipes = parsed;
+                        saveRecipesToLocal();
+                        showToast(`成功匯入 ${parsed.length} 筆廚房日誌！`, "success");
+                    } else {
+                        showToast("備份檔格式不符（必須為 Array 格式）。", "error");
+                    }
+                } catch (err) {
+                    showToast("解析 JSON 失敗，請確認檔案是否毀損。", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
